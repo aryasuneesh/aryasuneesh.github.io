@@ -1,0 +1,171 @@
+/* Custom CSS for Arya's Personal Website */
+
+/* Light lilac background */
+:root {
+    --theme: #f8f6ff; /* Light lilac background */
+    --entry: #f8f6ff; /* Light lilac for content areas */
+    --primary: rgba(87, 139, 230, 1); /* Baby blue for primary elements */
+    --secondary: rgba(87, 139, 230, 0.8); /* Baby blue with transparency */
+    --tertiary: rgba(87, 139, 230, 0.1); /* Very light baby blue */
+    --content: #333333; /* Dark text for readability */
+    --hljs-bg: #f8f6ff; /* Light lilac for code blocks */
+    --code-bg: rgba(87, 139, 230, 0.1); /* Light baby blue for inline code */
+    --border: rgba(87, 139, 230, 0.3); /* Baby blue borders */
+}
+
+/* Dark mode overrides (optional) */
+[data-theme="dark"] {
+    --theme: #2d2438; /* Dark lilac background */
+    --entry: #2d2438; /* Dark lilac for content areas */
+    --primary: #87ceeb; /* Light baby blue for dark mode */
+    --secondary: rgba(135, 206, 235, 0.8); /* Light baby blue with transparency */
+    --tertiary: rgba(135, 206, 235, 0.1); /* Very light baby blue */
+    --content: #e0e0e0; /* Light text for dark mode */
+    --hljs-bg: #2d2438; /* Dark lilac for code blocks */
+    --code-bg: rgba(135, 206, 235, 0.1); /* Light baby blue for inline code */
+    --border: rgba(135, 206, 235, 0.3); /* Light baby blue borders */
+}
+
+/* Social icons - baby blue color */
+.social-icons a svg {
+    fill: #87ceeb !important; /* Baby blue color */
+    transition: fill 0.3s ease;
+}
+
+.social-icons a:hover svg {
+    fill: #5f9ea0 !important; /* Slightly darker blue on hover */
+}
+
+/* Navigation links - baby blue */
+.main-nav a {
+    color: #87ceeb !important;
+}
+
+.main-nav a:hover {
+    color: #5f9ea0 !important;
+}
+
+/* Profile mode buttons - baby blue theme */
+.profile .buttons a {
+    background-color: #87ceeb !important;
+    color: white !important;
+    border: 1px solid #87ceeb !important;
+}
+
+.profile .buttons a:hover {
+    background-color: #5f9ea0 !important;
+    border-color: #5f9ea0 !important;
+}
+
+/* Post tags - baby blue */
+.post-tags li a {
+    background-color: rgba(135, 206, 235, 0.2) !important;
+    color: #4682b4 !important;
+    border: 1px solid rgba(135, 206, 235, 0.5) !important;
+}
+
+.post-tags li a:hover {
+    background-color: rgba(135, 206, 235, 0.4) !important;
+}
+
+/* Links - baby blue */
+.post-content a,
+.entry-content a {
+    color: #4682b4 !important;
+}
+
+.post-content a:hover,
+.entry-content a:hover {
+    color: #5f9ea0 !important;
+}
+
+/* Header and footer adjustments */
+.header {
+    background-color: rgba(248, 246, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+}
+
+.footer {
+    background-color: #f8f6ff !important;
+    border-top: 1px solid rgba(135, 206, 235, 0.3) !important;
+}
+
+/* Code blocks with light lilac background */
+pre {
+    background-color: rgba(248, 246, 255, 0.8) !important;
+    border: 1px solid rgba(135, 206, 235, 0.3) !important;
+}
+
+/* Inline code with baby blue tint */
+code {
+    background-color: rgba(135, 206, 235, 0.15) !important;
+    color: #4682b4 !important;
+    padding: 2px 4px !important;
+    border-radius: 3px !important;
+}
+
+/* Archive page styling */
+.archive-posts .archive-year {
+    color: #87ceeb !important;
+}
+
+.archive-posts .archive-month a {
+    color: #4682b4 !important;
+}
+
+.archive-posts .archive-month a:hover {
+    color: #5f9ea0 !important;
+}
+
+/* Breadcrumbs */
+.breadcrumbs a {
+    color: #87ceeb !important;
+}
+
+.breadcrumbs a:hover {
+    color: #5f9ea0 !important;
+}
+
+/* Search box (if enabled) */
+.search-input {
+    background-color: rgba(248, 246, 255, 0.8) !important;
+    border: 1px solid rgba(135, 206, 235, 0.5) !important;
+}
+
+/* Custom accent for important elements */
+.post-title a {
+    color: #4682b4 !important;
+}
+
+.post-title a:hover {
+    color: #5f9ea0 !important;
+}
+
+/* Table styling */
+table {
+    border: 1px solid rgba(135, 206, 235, 0.3) !important;
+}
+
+th {
+    background-color: rgba(135, 206, 235, 0.2) !important;
+    color: #4682b4 !important;
+}
+
+td {
+    border-bottom: 1px solid rgba(135, 206, 235, 0.2) !important;
+}
+
+/* Blockquote styling */
+blockquote {
+    border-left: 4px solid #87ceeb !important;
+    background-color: rgba(248, 246, 255, 0.8) !important;
+}
+
+/* Custom scrollbar (webkit browsers) */
+::-webkit-scrollbar-thumb {
+    background-color: #87ceeb !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #5f9ea0 !important;
+}

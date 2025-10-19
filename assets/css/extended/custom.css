@@ -1,0 +1,301 @@
+/* Custom CSS for Arya's Personal Website */
+/* Baby blue icons and light lilac background theme */
+
+/* Light mode - Light lilac background with baby blue accents */
+:root {
+    --theme: #f8f6ff; /* Light lilac background */
+    --entry: #f8f6ff; /* Light lilac for content areas */
+    --primary: #000000; /* BLACK for all text */
+    --secondary: #000000; /* BLACK for all text */
+    --tertiary: rgba(135, 206, 235, 0.1); /* Very light baby blue for backgrounds only */
+    --content: #000000; /* BLACK text for readability */
+    --hljs-bg: #f8f6ff; /* Light lilac for code blocks */
+    --code-bg: rgba(135, 206, 235, 0.1); /* Light baby blue for inline code */
+    --border: rgba(135, 206, 235, 0.3); /* Baby blue borders */
+}
+
+/* Body background */
+body {
+    background-color: #f8f6ff !important; /* Light lilac background */
+}
+
+/* Main content area */
+.main {
+    background-color: #f8f6ff !important;
+}
+
+/* Social icons - baby blue color */
+.social-icons a svg {
+    fill: #87ceeb !important; /* Baby blue color */
+    transition: fill 0.3s ease, transform 0.2s ease;
+}
+
+.social-icons a:hover svg {
+    fill: #4682b4 !important; /* Darker blue on hover */
+    transform: scale(1.1);
+}
+
+/* Navigation menu items - BLACK TEXT */
+.main-nav a {
+    color: #000000 !important;
+    transition: color 0.3s ease;
+}
+
+.main-nav a:hover {
+    color: #333333 !important;
+}
+
+/* Profile mode buttons */
+.profile .buttons a {
+    background-color: #87ceeb !important;
+    color: white !important;
+    border: 1px solid #87ceeb !important;
+    transition: all 0.3s ease;
+}
+
+.profile .buttons a:hover {
+    background-color: #4682b4 !important;
+    border-color: #4682b4 !important;
+    transform: translateY(-2px);
+}
+
+/* Post tags - BLACK TEXT */
+.post-tags li a {
+    background-color: rgba(135, 206, 235, 0.2) !important;
+    color: #000000 !important;
+    border: 1px solid rgba(135, 206, 235, 0.5) !important;
+    transition: all 0.3s ease;
+}
+
+.post-tags li a:hover {
+    background-color: rgba(135, 206, 235, 0.4) !important;
+    color: #000000 !important;
+    transform: translateY(-1px);
+}
+
+/* All links - keep text black */
+a {
+    color: #000000 !important;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #333333 !important;
+}
+
+/* Post content links */
+.post-content a,
+.entry-content a {
+    color: #000000 !important;
+    text-decoration: underline;
+    text-decoration-color: rgba(60, 93, 106, 0.5);
+}
+
+.post-content a:hover,
+.entry-content a:hover {
+    color: #333333 !important;
+    text-decoration-color: #87ceeb;
+}
+
+/* Header */
+.header {
+    background-color: rgba(248, 246, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(135, 206, 235, 0.2) !important;
+}
+
+/* Logo/site title - keep black */
+.logo a {
+    color: #000000 !important;
+}
+
+/* Footer */
+.footer {
+    background-color: #f8f6ff !important;
+    border-top: 1px solid rgba(135, 206, 235, 0.3) !important;
+}
+
+/* Code blocks */
+pre {
+    background-color: rgba(248, 246, 255, 0.8) !important;
+    border: 1px solid rgba(135, 206, 235, 0.3) !important;
+    border-radius: 8px !important;
+}
+
+/* Inline code - keep text black */
+code {
+    background-color: rgba(135, 206, 235, 0.15) !important;
+    color: #000000 !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    font-weight: 500;
+}
+
+/* Post titles - keep black */
+.post-title,
+.post-title a {
+    color: #000000 !important;
+}
+
+.post-title a:hover {
+    color: #333333 !important;
+}
+
+/* Archive page - keep text black */
+.archive-posts .archive-year {
+    color: #000000 !important;
+    font-weight: bold;
+}
+
+.archive-posts .archive-month a {
+    color: #000000 !important;
+}
+
+.archive-posts .archive-month a:hover {
+    color: #333333 !important;
+}
+
+/* Breadcrumbs - keep text black */
+.breadcrumbs a {
+    color: #000000 !important;
+}
+
+.breadcrumbs a:hover {
+    color: #333333 !important;
+}
+
+/* Tables */
+table {
+    border: 1px solid rgba(135, 206, 235, 0.3) !important;
+    border-radius: 8px !important;
+    overflow: hidden;
+}
+
+th {
+    background-color: rgba(135, 206, 235, 0.2) !important;
+    color: #000000 !important;
+    font-weight: 600;
+}
+
+td {
+    border-bottom: 1px solid rgba(135, 206, 235, 0.2) !important;
+}
+
+/* Blockquotes */
+blockquote {
+    border-left: 4px solid #87ceeb !important;
+    background-color: rgba(248, 246, 255, 0.8) !important;
+    padding: 16px 20px !important;
+    margin: 20px 0 !important;
+    border-radius: 0 8px 8px 0 !important;
+}
+
+/* Cards/entries */
+.post-entry {
+    background-color: rgba(248, 246, 255, 0.6) !important;
+    border: 1px solid rgba(135, 206, 235, 0.2) !important;
+    border-radius: 12px !important;
+    transition: all 0.3s ease;
+}
+
+.post-entry:hover {
+    border-color: rgba(135, 206, 235, 0.5) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(135, 206, 235, 0.2) !important;
+}
+
+/* Search (if enabled) */
+.search-input {
+    background-color: rgba(248, 246, 255, 0.8) !important;
+    border: 2px solid rgba(135, 206, 235, 0.3) !important;
+    border-radius: 8px !important;
+}
+
+.search-input:focus {
+    border-color: #87ceeb !important;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(135, 206, 235, 0.2) !important;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(248, 246, 255, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #87ceeb !important;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #4682b4 !important;
+}
+
+/* Dark mode support (optional) */
+[data-theme="dark"] {
+    --theme: #2d2438 !important; /* Dark lilac */
+    --entry: #2d2438 !important;
+    --primary: #b8d4f0 !important; /* Light baby blue for dark mode */
+    --secondary: rgba(184, 212, 240, 0.8) !important;
+    --tertiary: rgba(184, 212, 240, 0.1) !important;
+    --content: #e0e0e0 !important;
+    --hljs-bg: #2d2438 !important;
+    --code-bg: rgba(184, 212, 240, 0.1) !important;
+    --border: rgba(184, 212, 240, 0.3) !important;
+}
+
+[data-theme="dark"] body {
+    background-color: #2d2438 !important;
+}
+
+/* COMPREHENSIVE TEXT COLOR OVERRIDES - FORCE ALL TEXT TO BLACK */
+body, 
+p, 
+h1, h2, h3, h4, h5, h6,
+.post-content,
+.entry-content,
+.post-summary,
+.post-description,
+.archive-entry-link,
+.list-entry,
+.menu a,
+nav a,
+.breadcrumbs,
+.footer,
+.header,
+span,
+div {
+    color: #000000 !important;
+}
+
+/* Ensure all links are black */
+a, a:visited, a:link {
+    color: #000000 !important;
+}
+
+a:hover, a:active, a:focus {
+    color: #333333 !important;
+}
+
+/* Dark mode overrides */
+[data-theme="dark"] body,
+[data-theme="dark"] p,
+[data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3, 
+[data-theme="dark"] h4, [data-theme="dark"] h5, [data-theme="dark"] h6,
+[data-theme="dark"] .post-content,
+[data-theme="dark"] .entry-content,
+[data-theme="dark"] a {
+    color: #e0e0e0 !important;
+}
+
+[data-theme="dark"] .social-icons a svg {
+    fill: #b8d4f0 !important;
+}
+
+[data-theme="dark"] .social-icons a:hover svg {
+    fill: #87ceeb !important;
+}
