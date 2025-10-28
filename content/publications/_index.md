@@ -1,4 +1,6 @@
 ---
 title: "Publications"
-description: "Publications, presentations, and academic contributions by Arya Suneesh."
+description: "Research papers, publications, and academic contributions in quantum computing, NLP, and machine learning."
 ---
+
+## Publications

@@ -55,7 +55,7 @@ params:
     profileMode:
           enabled: true
           title: Arya Suneesh
-          subtitle: "NLP Engineer at TIFIN RM with expertise in AI research, quantum computing, and multilingual systems. Graduate of IIIT Kottayam with international research experience at Berlin University of the Arts and Munich Center for Quantum Science and Technology."
+          subtitle: "NLP Engineer at TIFIN RM with expertise in AI research and quantum computing. Undergraduate of IIIT Kottayam with international research experience."
           imageUrl: "picture.jpeg"
           imageWidth: 160
           imageHeight: 160
@@ -70,6 +70,8 @@ params:
               url: publications/
             - name: Blog
               url: blog/
+            - name: Tags
+              url: tags/
             - name: Archive
               url: archive/
 
@@ -98,7 +100,7 @@ params:
         hiddenInSingle: true
     label:
       text: "Arya Suneesh"
-      icon: favicon.ico
+      icon: icons8-flower-16.png
       iconHeight: 18
 
 markup:
