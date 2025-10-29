@@ -9,9 +9,8 @@ summary: "Two-year scholarship and mentorship program focusing on software engin
 ## Overview
 
 **Program:** Women Engineers Program Cohort 4  
-**Sponsors:** NSE Talent Sprint & Google  
+**Sponsors:** NSE Talent Sprint (supported by Google)
 **Duration:** August 2021 - July 2023 (2 years)  
-**Selection:** Competitive selection during first year of college  
 **Location:** IIIT Kottayam, Kerala, India
 
 In my first year of college, I had the privilege of being selected for the Women Engineers Program Cohort 4, a prestigious initiative supported by NSE Talent Sprint and Google. This transformative program provided scholarship support and comprehensive mentorship designed to develop exceptional software engineers from underrepresented communities.
