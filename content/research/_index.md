@@ -26,4 +26,4 @@ I'm excited about pursuing graduate studies to deepen my theoretical foundations
 
 - Multilingual and cross-cultural AI systems
 - Advanced quantum algorithms for optimization and simulation
-- Interpretable and 
+- Interpretable and culturally-compatible language models
