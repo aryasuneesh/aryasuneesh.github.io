@@ -238,17 +238,17 @@
       left: -26px; top: 3px; bottom: 3px; width: 9px;
       background: none; border: none; padding: 0; margin: 0;
       cursor: pointer; outline: none;
-      opacity: 0;
+      opacity: 0.35;
       transition: opacity .18s ease, border-color .15s ease, box-shadow .15s ease;
-      border-left:   1.5px solid rgba(135,206,235,.5);
-      border-top:    1.5px solid rgba(135,206,235,.5);
-      border-bottom: 1.5px solid rgba(135,206,235,.5);
+      border-left:   2px solid rgba(135,206,235,.75);
+      border-top:    2px solid rgba(135,206,235,.75);
+      border-bottom: 2px solid rgba(135,206,235,.75);
       border-radius: 2px 0 0 2px;
     }
     .lc-para:hover > .tok-bracket { opacity: 1; }
     .tok-bracket:hover {
-      border-color: rgba(135,206,235,.95);
-      box-shadow: -3px 0 10px rgba(135,206,235,.22);
+      border-color: rgba(135,206,235,1);
+      box-shadow: -3px 0 12px rgba(135,206,235,.35);
     }
     .tok-bracket::after {
       content: 'tokenize';
@@ -285,9 +285,12 @@
     /* ── Publications ─────────────────────────────────────────── */
     .pub-list { counter-reset: pub; }
     .pub-entry {
+      display: block; text-decoration: none; color: inherit;
       margin-bottom: 14px; padding-left: 28px; position: relative;
       font-size: 15px; line-height: 1.65; font-family: var(--lc-font);
+      border-radius: 4px; transition: background .15s;
     }
+    .pub-entry:hover { background: rgba(135,206,235,.07); }
     .pub-entry::before {
       content: '[' counter(pub) ']'; counter-increment: pub;
       position: absolute; left: 0; top: 2px;
@@ -697,7 +700,7 @@
     </div>
 
     <div class="lc-para" style="position:relative;">
-      <span class="mn l red">revised<br>May 2025</span>
+      <span class="mn l red" style="top:-52px;">revised<br>May 2026</span>
       <span class="ner person" data-label="PERSON">Arya Suneesh</span> is an
       <span class="hl-y">NLP researcher and engineer</span> whose work spans language, finance, and quantum computing.
       At <span class="ner org" data-label="ORG">TIFIN RM</span> she built
@@ -745,13 +748,6 @@
         &nbsp;&nbsp;|&nbsp;&nbsp; <span style="color:rgba(160,100,220,.8)">purple arc = cross-clause</span>
         &nbsp;&nbsp;|&nbsp;&nbsp; max 12 tokens
       </div>
-    </div>
-
-    <!-- Attention heatmap -->
-    <div class="attn-wrap">
-      <div class="attn-label">◈ SELF-ATTENTION · BERT-base layer 8 head 5 · "attention maps meaning across token boundaries"</div>
-      <div id="lcAttnHeatmap" style="overflow-x:auto;"></div>
-      <div class="attn-caption">query (row) → key (col) · cell opacity = attention weight · diagonal = self-attention · darker = higher weight</div>
     </div>
 
     <!-- Concept embedding projection -->
@@ -841,7 +837,7 @@
       <span class="card-status">[COMPLETED]</span>
       <div class="card-title">
         NLP Engineer — <span class="ner org" data-label="ORG">TIFIN RM</span>
-        <span class="ner loc" data-label="GPE"> · Bengaluru</span>
+         · <span class="ner loc" data-label="GPE">Bengaluru</span>
       </div>
       <div class="card-meta">May 2025 – Jan 2026</div>
       <div class="card-body" style="position:relative;">
@@ -858,7 +854,7 @@
       <span class="card-status">[COMPLETED]</span>
       <div class="card-title">
         Student Researcher — <span class="ner org" data-label="ORG">Walther-Meißner-Institut (WMI)</span>
-        <span class="ner loc" data-label="GPE"> · Munich</span>
+         · <span class="ner loc" data-label="GPE">Munich</span>
       </div>
       <div class="card-meta">Jul 2025 – Aug 2025 &nbsp;·&nbsp; MCQST Summer Bachelor Program &nbsp;·&nbsp; 1 of 16 worldwide</div>
       <div class="card-body">
@@ -874,7 +870,7 @@
       <span class="card-status">[COMPLETED]</span>
       <div class="card-title">
         AI Research Intern — <span class="ner org" data-label="ORG">TIFIN RM</span>
-        <span class="ner loc" data-label="GPE"> · Bengaluru</span>
+         · <span class="ner loc" data-label="GPE">Bengaluru</span>
       </div>
       <div class="card-meta">Jan 2025 – Apr 2025</div>
       <div class="card-body">
@@ -931,7 +927,7 @@
       <span class="card-status">[COMPLETED]</span>
       <div class="card-title">
         AI Research Intern — <span class="ner org" data-label="ORG">MyFi by TIFIN</span>
-        <span class="ner loc" data-label="GPE"> · Bengaluru</span>
+         · <span class="ner loc" data-label="GPE">Bengaluru</span>
       </div>
       <div class="card-meta">Oct 2024 – Dec 2024</div>
       <div class="card-body">
@@ -946,7 +942,7 @@
       <span class="card-status">[COMPLETED]</span>
       <div class="card-title">
         Research Intern (DAAD-WISE Scholar) — <span class="ner org" data-label="ORG">UdK Berlin</span> / <span class="ner org" data-label="ORG">ECDF</span>
-        <span class="ner loc" data-label="GPE"> · Berlin</span>
+         · <span class="ner loc" data-label="GPE">Berlin</span>
       </div>
       <div class="card-meta">May 2024 – Jul 2024 &nbsp;·&nbsp; DAAD-WISE Scholarship &nbsp;·&nbsp; 1 of 250 selected from India &nbsp;·&nbsp; <span class="hl-b">Human-Centered Data Science · HCI</span></div>
       <div class="card-body">
@@ -958,6 +954,13 @@
       </div>
     </div>
   </section>
+
+  <!-- Attention heatmap -->
+  <div class="attn-wrap">
+    <div class="attn-label">◈ SELF-ATTENTION · BERT-base layer 8 head 5 · "attention maps meaning across token boundaries"</div>
+    <div id="lcAttnHeatmap" style="overflow-x:auto;"></div>
+    <div class="attn-caption">query (row) → key (col) · cell opacity = attention weight · diagonal = self-attention · darker = higher weight</div>
+  </div>
 
   <!-- § 3 Projects -->
   <section class="sec">
@@ -1012,43 +1015,43 @@
     </div>
     <div class="pub-list">
 
-      <div class="pub-entry">
+      <a class="pub-entry" href="https://aclanthology.org/2025.quantumnlp-1.7/" target="_blank" rel="noopener">
         <span class="pub-authors">Suneesh, A., Balasubramanian P. </span>
         <span class="pub-title">"QCNN-MFND: A Novel Quantum CNN Framework for Multimodal Fake News Detection in Social Media." </span>
         <span class="pub-venue">QNLP Workshop, AACL-IJCNLP 2025, Mumbai.</span>
-      </div>
+      </a>
 
-      <div class="pub-entry">
+      <a class="pub-entry" href="https://arxiv.org/abs/2512.01439" target="_blank" rel="noopener">
         <span class="pub-authors">Hazarika, B., Suneesh, A., Devadiga, P., Rajpoot, P.K., Suresh, A.B., Hussain, A.I. </span>
         <span class="pub-title">"Multilingual Conversational AI for Financial Assistance: Bridging Language Barriers in Indian FinTech." </span>
         <span class="pub-venue">FinAI Workshop, CIKM 2025, Seoul.</span>
-      </div>
+      </a>
 
-      <div class="pub-entry">
+      <a class="pub-entry" href="https://ceur-ws.org/Vol-4038/paper_95.pdf" target="_blank" rel="noopener">
         <span class="pub-authors">Sharma, M., Suneesh, A., Jain, M., Rajpoot, P.K., Devadiga, P. et al. </span>
         <span class="pub-title">"TIFIN at CheckThat! 2025: Reasoning-Guided Claim Normalization for Noisy Multilingual Social Media Posts." </span>
         <span class="pub-venue">CheckThat! Workshop, CLEF 2025, Barcelona.</span>
         <span class="pub-award">3rd place · Task 2</span>
-      </div>
+      </a>
 
-      <div class="pub-entry">
+      <a class="pub-entry" href="https://ceur-ws.org/Vol-4038/paper_72.pdf" target="_blank" rel="noopener">
         <span class="pub-authors">Gurumurthy, K., Shrivastava, A., Rajpoot, P.K., Devadiga, P., Hazarika, B., Jain, M., Sharma, M., Suneesh, A. et al. </span>
         <span class="pub-title">"TIFIN at CheckThat! 2025: Cross-Lingual Subjectivity Classification in News through Monolingual, Multilingual, and Zero-Shot Learning." </span>
         <span class="pub-venue">CheckThat! Workshop, CLEF 2025, Barcelona.</span>
-      </div>
+      </a>
 
-      <div class="pub-entry">
+      <a class="pub-entry" href="https://ceur-ws.org/Vol-4038/paper_74.pdf" target="_blank" rel="noopener">
         <span class="pub-authors">Hazarika, B., Devadiga, P., Rajpoot, P.K., Baliga, A.U., Gurumurthy, K., Jain, M., Sharma, M., Shrivastava, A., Suneesh, A., Suresh, A.B. </span>
         <span class="pub-title">"TIFIN at CheckThat! 2025: X-VERIFY – Multi-lingual NLI-based Fact Checking with Condensed Evidence." </span>
         <span class="pub-venue">CheckThat! Workshop, CLEF 2025, Barcelona.</span>
-      </div>
+      </a>
 
-      <div class="pub-entry">
+      <a class="pub-entry" href="https://aclanthology.org/2025.semeval-1.299/" target="_blank" rel="noopener">
         <span class="pub-authors">Devadiga, P., Suneesh, A., Rajpoot, P.K., Hazarika, B., Baliga, A.U. </span>
         <span class="pub-title">"TIFIN India at SemEval-2025: Harnessing Translation to Overcome Multilingual IR Challenges in Fact-Checked Claim Retrieval." </span>
         <span class="pub-venue">SemEval 2025, ACL 2025, Vienna.</span>
         <span class="pub-award">3rd place · Task 7</span>
-      </div>
+      </a>
 
     </div>
   </section>
