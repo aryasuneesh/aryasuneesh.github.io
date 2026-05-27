@@ -5,7 +5,7 @@
 - **Name:** Arya Suneesh
 - **Website:** https://aryasuneesh.github.io/
 - **Email:** aryasuneesh3@gmail.com
-- **Location:** Remote (India)
+- **Location:** India
 - **Education:** B.Tech, IIIT Kottayam
 
 ## Current Role
@@ -63,6 +63,7 @@
 
 ## Social Profiles
 
+- Email: mailto:aryasuneesh3@gmail.com
 - LinkedIn: https://www.linkedin.com/in/arya-suneesh/
 - GitHub: https://github.com/aryasuneesh
 - Google Scholar: https://scholar.google.com/citations?user=0tq3v-4AAAAJ&hl=en
