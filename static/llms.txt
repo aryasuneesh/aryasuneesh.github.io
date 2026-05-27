@@ -1,0 +1,18 @@
+# Arya Suneesh
+
+> NLP Engineer at TIFIN RM, AI researcher, and quantum computing enthusiast. Undergraduate of IIIT Kottayam with international research experience in Munich and Berlin.
+
+Arya Suneesh is an NLP Engineer and AI researcher focused on multilingual natural language processing, production machine learning systems, and quantum computing applications. She has published research at SemEval-2025 and CLEF 2025, and has conducted quantum computing research at the Munich Center for Quantum Science and Technology (MCQST).
+
+## Key Pages
+
+- [Home](https://aryasuneesh.github.io/): Profile overview and social links
+- [Experience](https://aryasuneesh.github.io/experience/): Professional and research experience
+- [Research](https://aryasuneesh.github.io/research/): Research interests and philosophy
+- [Publications](https://aryasuneesh.github.io/publications/): Peer-reviewed papers and conference proceedings
+- [Projects](https://aryasuneesh.github.io/projects/): Technical projects
+- [Blog](https://aryasuneesh.github.io/blog/): Writing and thoughts
+
+## Detailed Profile
+
+- [llms-full.txt](https://aryasuneesh.github.io/llms-full.txt): Full profile for AI platforms

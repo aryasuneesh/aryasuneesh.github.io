@@ -1,0 +1,71 @@
+# Arya Suneesh — Full Profile
+
+## Identity
+
+- **Name:** Arya Suneesh
+- **Website:** https://aryasuneesh.github.io/
+- **Email:** aryasuneesh3@gmail.com
+- **Location:** Remote (India)
+- **Education:** B.Tech, IIIT Kottayam
+
+## Current Role
+
+**NLP Engineer, TIFIN RM** (January 2025 – Present)
+- Led production deployment of a semantic caching system using MPNet embeddings, achieving >40% latency reduction for financial advisors
+- Spearheaded expansion of TIFIN RM's NLP capabilities to cover alternative investments (hedge funds, private equity)
+- Developed intent recognition and entity recognition systems for financial query understanding
+- Resolved critical production issues and optimized response generators through prompt engineering
+
+## Research Experience
+
+**MCQST Summer Bachelor Program** — Munich Center for Quantum Science and Technology, LMU Munich (July–August 2025)
+- Selected as 1 of 16 participants worldwide
+- Implemented Variational Quantum Eigensolver (VQE) for SU(2) Yang-Mills gauge theory on superconducting quantum hardware at Walther-Meißner-Institut
+- Designed a 4-qubit architecture with post-selection and symmetry-based error correction
+
+**DAAD WISE Scholar** — Berlin University of the Arts & Einstein Center for Digital Future (May–July 2024)
+- Selected as 1 of 250 DAAD WISE recipients worldwide
+- Built speech recognition models (DeepSpeech, Whisper) for the Reading Primer digital education device
+- Developed adaptive NLP and ASR systems optimized for Raspberry Pi hardware for child literacy
+
+## Publications
+
+1. **TIFIN at CheckThat! 2025: Reasoning-Guided Claim Normalization for Noisy Multilingual Social Media Posts**
+   - Authors: Manan Sharma, Arya Suneesh, et al.
+   - Venue: CLEF 2025 Working Notes, CEUR-WS Vol. 4038
+   - Key result: 41.3% relative improvement in METEOR over baseline; 3rd rank on English leaderboard
+   - URL: https://ceur-ws.org/Vol-4038/paper_95.pdf
+
+2. **TIFIN India at SemEval-2025: Harnessing Translation to Overcome Multilingual IR Challenges in Fact-Checked Claim Retrieval**
+   - Authors: Prasanna Devadiga, Arya Suneesh, et al.
+   - Venue: SemEval-2025, Proceedings of NAACL 2025
+   - Key result: success@10 of 0.938 (monolingual), 0.810 (crosslingual)
+   - URL: https://arxiv.org/abs/2504.16627
+
+3. **TIFIN at CheckThat! 2025: Cross-Lingual Subjectivity Classification in News**
+   - Authors: Kishan Gurumurthy, Arya Suneesh, et al.
+   - Venue: CLEF 2025 Working Notes, CEUR-WS Vol. 4038
+   - URL: https://ceur-ws.org/Vol-4038/paper_72.pdf
+
+## Research Interests
+
+- Multilingual and cross-cultural NLP systems
+- Semantic understanding and production NLP optimization
+- Quantum NLP and quantum-inspired optimization
+- AI in education and adaptive learning systems
+- Interpretable and culturally-compatible language models
+
+## Technical Skills
+
+- **NLP/ML:** Semantic caching, multilingual embeddings, fine-tuning LLMs (Qwen3-14B, MPNet), LoRA, RAG, information retrieval
+- **Quantum Computing:** VQE, NISQ devices, superconducting quantum hardware, Qiskit
+- **Languages & Tools:** Python, Raspberry Pi, DeepSpeech, Whisper, Chroma vector DB, bash
+
+## Social Profiles
+
+- LinkedIn: https://www.linkedin.com/in/arya-suneesh/
+- GitHub: https://github.com/aryasuneesh
+- Google Scholar: https://scholar.google.com/citations?user=0tq3v-4AAAAJ&hl=en
+- Twitter/X: https://x.com/arya_suneesh
+- YouTube: https://www.youtube.com/@aryasuneesh/
+- Substack: https://aryasuneesh.substack.com

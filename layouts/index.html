@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="{{ site.Language }}" dir="{{ .Language.LanguageDirection | default "auto" }}">
+<head>
+    {{- partial "head.html" . }}
+    <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300;400;500;600;700&family=Lexend:wght@400;600;700&family=PT+Mono&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+    /* ── Living Corpus Home — CSS variables ──────────────────── */
+    :root {
+      --paper: #faf9f6;
+      --page-bg: #edeaf7;
+      --ink: #1a1a2e;
+      --ink-light: #4a4a6a;
+      --blue: #87ceeb;
+      --lilac: #c8b4ff;
+      --ner-person-bg: #ffe8e8; --ner-person-border: #ffaaaa;
+      --ner-org-bg:    #ddf0ff; --ner-org-border:    #87ceeb;
+      --ner-loc-bg:    #e0f5e6; --ner-loc-border:    #77cc88;
+      --ner-tech-bg:   #f0e8ff; --ner-tech-border:   #bb88ff;
+      --hl-yellow: rgba(255,235,80,0.55);
+      --hl-blue:   rgba(135,206,235,0.38);
+      --hl-pink:   rgba(255,170,170,0.38);
+      --margin-ink: #5555aa;
+      --lc-font:      'Lexend Deca', 'Lexend', sans-serif;
+      --lc-font-hand: 'Caveat', cursive;
+      --lc-font-mono: 'PT Mono', monospace;
+    }
+
+    /* ── Body / page background ───────────────────────────────── */
+    body.list {
+      background: var(--page-bg) !important;
+      background-color: var(--page-bg) !important;
+      background-image:
+        radial-gradient(ellipse at 20% 60%, rgba(200,180,255,.12) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 15%, rgba(135,206,235,.10) 0%, transparent 45%) !important;
+    }
+
+    /* ── Living-corpus wrapper ────────────────────────────────── */
+    .lc-wrap {
+      padding: 24px 20px 80px;
+      min-height: calc(100vh - 44px);
+      font-family: var(--lc-font);
+      color: var(--ink);
+    }
+
+    /* ── Controls (RAW MODE) ──────────────────────────────────── */
+    .lc-controls {
+      position: fixed; top: 64px; right: 20px;
+      z-index: 200;
+      display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+    }
+    .lc-raw-btn {
+      background: var(--ink); color: #d8d8ff;
+      border: none; padding: 8px 16px;
+      font-family: var(--lc-font-mono); font-size: 11px; letter-spacing: .8px;
+      cursor: pointer; border-radius: 4px; transition: all .2s;
+    }
+    .lc-raw-btn:hover { background: #3d3d7a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(80,60,180,.3); }
+    .lc-raw-btn.on { background: #5533aa; box-shadow: 0 0 16px rgba(130,80,255,.4); }
+    .lc-mode-label { font-family: var(--lc-font-hand); font-size: 13px; color: var(--margin-ink); opacity: .7; }
+
+    /* ── Document paper ───────────────────────────────────────── */
+    .doc-wrap { max-width: 860px; margin: 0 auto; position: relative; }
+    .document {
+      background: var(--paper);
+      box-shadow: 0 4px 6px rgba(0,0,0,.06), 0 24px 48px rgba(100,80,180,.13), 8px 8px 0 rgba(200,180,255,.25);
+      border-radius: 2px;
+      padding: 64px 88px 88px;
+      position: relative;
+      background-image: repeating-linear-gradient(
+        0deg, transparent, transparent 27px,
+        rgba(135,206,235,.055) 27px, rgba(135,206,235,.055) 28px
+      );
+    }
+    .document::before {
+      content: ''; position: absolute;
+      left: 66px; top: 0; bottom: 0; width: 1px;
+      background: rgba(255,140,140,.3);
+    }
+    .document::after {
+      content: 'DRAFT';
+      position: absolute; top: 46%; left: 50%;
+      transform: translate(-50%,-50%) rotate(-28deg);
+      font-family: var(--lc-font-hand); font-size: 130px; font-weight: 700;
+      color: rgba(135,206,235,.065); pointer-events: none; white-space: nowrap;
+    }
+
+    /* ── Doc header ───────────────────────────────────────────── */
+    .doc-header {
+      border-bottom: 2px solid rgba(135,206,235,.5);
+      padding-bottom: 36px; margin-bottom: 52px; position: relative;
+    }
+    .draft-stamp {
+      display: inline-block;
+      border: 2px solid rgba(190,80,80,.45);
+      font-family: var(--lc-font-mono); font-size: 10px;
+      padding: 3px 9px; letter-spacing: 2.5px;
+      transform: rotate(-1.5deg); margin-bottom: 18px;
+    }
+    .paper-meta {
+      font-family: var(--lc-font-mono); font-size: 10px;
+      opacity: .55; margin-bottom: 22px; display: flex; gap: 24px;
+    }
+    .live-dot { display: inline-block; width: 6px; height: 6px; background: #4caf50; border-radius: 50%; margin-right: 6px; animation: lc-blink 2.2s infinite; }
+    @keyframes lc-blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    h1.doc-title { font-size: 44px; font-weight: 600; letter-spacing: -.5px; margin-bottom: 5px; font-family: var(--lc-font); }
+    .doc-subtitle { font-style: italic; font-size: 19px; margin-bottom: 18px; font-family: var(--lc-font); }
+    .affiliations { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 22px; align-items: center; font-family: var(--lc-font); }
+    .affiliations .sep { color: rgba(100,100,140,.4); }
+
+    /* ── Social pills ─────────────────────────────────────────── */
+    .social-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+    .lc-social-pill {
+      font-family: var(--lc-font-mono); font-size: 11px;
+      border: 1px solid rgba(135,206,235,.45);
+      padding: 4px 11px; border-radius: 20px;
+      text-decoration: none; transition: all .18s;
+    }
+    .lc-social-pill:hover { background: rgba(135,206,235,.1) !important; }
+
+    /* ── Abstract ─────────────────────────────────────────────── */
+    .abstract {
+      background: rgba(135,206,235,.08);
+      border-left: 3px solid rgba(135,206,235,.6);
+      padding: 16px 22px; position: relative;
+    }
+    .abstract-label {
+      font-family: var(--lc-font-mono); font-size: 9px; letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 8px;
+    }
+    .abstract p { font-size: 16px; line-height: 1.75; font-family: var(--lc-font); }
+
+    /* ── Sections ─────────────────────────────────────────────── */
+    .sec { margin-bottom: 56px; position: relative; }
+    .sec-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; }
+    .sec-num { font-family: var(--lc-font-mono); font-size: 11px; font-weight: 500; }
+    .sec-title {
+      font-size: 22px; font-weight: 600; font-family: var(--lc-font);
+      border-bottom: 1px solid rgba(135,206,235,.3);
+      padding-bottom: 4px; flex: 1;
+    }
+
+    /* ── Paragraphs ───────────────────────────────────────────── */
+    .lc-para { font-size: 17px; line-height: 1.9; margin-bottom: 20px; position: relative; font-family: var(--lc-font); }
+
+    /* ── NER entities ─────────────────────────────────────────── */
+    .ner {
+      display: inline; padding: 1px 5px; border-radius: 3px;
+      cursor: help; position: relative; transition: filter .15s;
+    }
+    .ner:hover { filter: brightness(.93); }
+    .ner::after {
+      content: attr(data-label);
+      position: absolute; top: -22px; left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--lc-font-mono); font-size: 8px; letter-spacing: .5px;
+      padding: 2px 5px; border-radius: 3px; white-space: nowrap;
+      pointer-events: none; font-weight: 600;
+      opacity: 0; transition: opacity .15s;
+    }
+    .ner:hover::after { opacity: 1; }
+    .ner.person { background: var(--ner-person-bg); border-bottom: 1.5px solid var(--ner-person-border); }
+    .ner.person::after { background: var(--ner-person-border); }
+    .ner.org  { background: var(--ner-org-bg);    border-bottom: 1.5px solid var(--ner-org-border); }
+    .ner.org::after  { background: var(--ner-org-border); }
+    .ner.loc  { background: var(--ner-loc-bg);    border-bottom: 1.5px solid var(--ner-loc-border); }
+    .ner.loc::after  { background: var(--ner-loc-border); }
+    .ner.tech { background: var(--ner-tech-bg);   border-bottom: 1.5px solid var(--ner-tech-border); }
+    .ner.tech::after { background: var(--ner-tech-border); }
+
+    /* ── Highlights ───────────────────────────────────────────── */
+    .hl-y { background: var(--hl-yellow); border-radius: 2px; }
+    .hl-b { background: var(--hl-blue);   border-radius: 2px; }
+    .hl-p { background: var(--hl-pink);   border-radius: 2px; }
+    .struck { text-decoration: line-through; opacity: .55; }
+
+    /* ── Margin notes ─────────────────────────────────────────── */
+    .mn {
+      position: absolute; font-family: var(--lc-font-hand); font-size: 13px;
+      line-height: 1.4; width: 116px; pointer-events: none;
+    }
+    .mn.l { left: -134px; top: 0; text-align: right; }
+    .mn.r { right: -134px; top: 0; }
+    .mn.red { }
+
+    /* ── Dep-arc ──────────────────────────────────────────────── */
+    .dep-wrap {
+      margin: 28px 0;
+      background: rgba(248,246,255,.7);
+      border: 1px dashed rgba(135,206,235,.45);
+      border-radius: 6px; padding: 18px 18px 12px;
+    }
+    .dep-label {
+      font-family: var(--lc-font-mono); font-size: 9px; letter-spacing: 1.5px;
+      margin-bottom: 10px; text-align: center;
+    }
+    .dep-caption {
+      font-size: 12px; font-family: var(--lc-font-mono);
+      text-align: center; margin-top: 8px; letter-spacing: .5px;
+    }
+    .dep-controls {
+      display: flex; gap: 8px; margin-bottom: 14px; align-items: center;
+    }
+    .dep-controls input {
+      flex: 1; font-family: var(--lc-font-mono); font-size: 12px;
+      padding: 7px 10px; border-radius: 5px;
+      border: 1px solid rgba(135,206,235,.4);
+      background: rgba(255,255,255,.85);
+      color: #1a1a2e;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .dep-controls input:focus {
+      border-color: rgba(135,206,235,.8);
+      box-shadow: 0 0 0 2px rgba(135,206,235,.15);
+    }
+    .dep-controls button {
+      font-family: var(--lc-font-mono); font-size: 11px; letter-spacing: 1px;
+      padding: 7px 14px; border-radius: 5px; cursor: pointer; white-space: nowrap;
+      background: rgba(135,206,235,.18);
+      border: 1px solid rgba(135,206,235,.5);
+      color: rgba(60,100,160,.9);
+      transition: all .2s;
+    }
+    .dep-controls button:hover {
+      background: rgba(135,206,235,.38);
+      border-color: rgba(135,206,235,.8);
+    }
+    .dep-loading {
+      font-family: var(--lc-font-mono); font-size: 11px;
+      text-align: center; padding: 40px 0;
+      color: rgba(135,206,235,.6);
+    }
+
+    /* ── Para tokenize bracket ──────────────────────────────────── */
+    .tok-bracket {
+      position: absolute;
+      left: -26px; top: 3px; bottom: 3px; width: 9px;
+      background: none; border: none; padding: 0; margin: 0;
+      cursor: pointer; outline: none;
+      opacity: 0;
+      transition: opacity .18s ease, border-color .15s ease, box-shadow .15s ease;
+      border-left:   1.5px solid rgba(135,206,235,.5);
+      border-top:    1.5px solid rgba(135,206,235,.5);
+      border-bottom: 1.5px solid rgba(135,206,235,.5);
+      border-radius: 2px 0 0 2px;
+    }
+    .lc-para:hover > .tok-bracket { opacity: 1; }
+    .tok-bracket:hover {
+      border-color: rgba(135,206,235,.95);
+      box-shadow: -3px 0 10px rgba(135,206,235,.22);
+    }
+    .tok-bracket::after {
+      content: 'tokenize';
+      position: absolute; left: 13px; top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--lc-font-mono); font-size: 7.5px; letter-spacing: .5px;
+      color: rgba(135,206,235,.7); white-space: nowrap;
+      opacity: 0; pointer-events: none;
+      transition: opacity .12s ease;
+    }
+    .tok-bracket:hover::after { opacity: 1; }
+
+    /* ── Experience cards ─────────────────────────────────────── */
+    .card {
+      border: 1px solid rgba(135,206,235,.3); border-radius: 6px;
+      padding: 20px 24px; margin-bottom: 18px; position: relative;
+      background: rgba(248,246,255,.55);
+    }
+    .card-status {
+      position: absolute; top: 14px; right: 16px;
+      font-family: var(--lc-font-mono); font-size: 9px; letter-spacing: 1px;
+    }
+    .card-title { font-size: 17px; font-weight: 600; margin-bottom: 8px; font-family: var(--lc-font); }
+    .card-meta { font-family: var(--lc-font-mono); font-size: 12px; margin-bottom: 10px; letter-spacing: .3px; }
+    .card-body { font-size: 15px; line-height: 1.75; font-family: var(--lc-font); }
+    .card-body ul { margin: 6px 0 0 18px; }
+    .card-body li { margin-bottom: 5px; }
+    .todo-tag {
+      display: inline-block; font-family: var(--lc-font-hand); font-size: 12px;
+      background: rgba(255,195,80,.18);
+      border: 1px dashed rgba(200,150,0,.4); padding: 1px 7px; border-radius: 3px; margin-left: 8px;
+    }
+
+    /* ── Publications ─────────────────────────────────────────── */
+    .pub-list { counter-reset: pub; }
+    .pub-entry {
+      margin-bottom: 14px; padding-left: 28px; position: relative;
+      font-size: 15px; line-height: 1.65; font-family: var(--lc-font);
+    }
+    .pub-entry::before {
+      content: '[' counter(pub) ']'; counter-increment: pub;
+      position: absolute; left: 0; top: 2px;
+      font-family: var(--lc-font-mono); font-size: 10px;
+    }
+    .pub-title { font-weight: 600; }
+    .pub-venue { font-style: italic; }
+    .pub-award {
+      display: inline-block; font-family: var(--lc-font-mono); font-size: 9px;
+      background: rgba(255,215,80,.2); border: 1px solid rgba(200,165,0,.35);
+      padding: 1px 6px; border-radius: 3px; margin-left: 6px; vertical-align: middle;
+    }
+
+    /* ── Classified ───────────────────────────────────────────── */
+    .classified {
+      border: 2px solid rgba(200,50,50,.38);
+      border-radius: 4px; padding: 24px; position: relative;
+      background: rgba(255,240,240,.28);
+      transition: border-color .4s, background .4s;
+    }
+    .classified.unlocked {
+      border-color: rgba(60,180,110,.5);
+      background: rgba(240,255,248,.38);
+      animation: lc-unlock .5s ease;
+    }
+    @keyframes lc-unlock { 0%{background:rgba(80,200,140,.25)} 100%{background:rgba(240,255,248,.38)} }
+    .cl-banner { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .cl-stamp {
+      display: inline-block;
+      border: 2px solid rgba(170,35,35,.5);
+      font-family: var(--lc-font-mono); font-size: 13px; letter-spacing: 3px;
+      padding: 4px 12px; transform: rotate(-1deg);
+      transition: color .4s, border-color .4s;
+    }
+    .cl-level { font-family: var(--lc-font-mono); font-size: 9px; letter-spacing: 1px; }
+    .redacted-block {
+      display: block; font-size: 17px; line-height: 1.9; margin-bottom: 6px;
+      color: transparent; background: #1a1818; border-radius: 2px;
+      user-select: none; transition: background .5s, color .5s;
+    }
+    .classified.unlocked .redacted-block { display: none; }
+    .blacked {
+      background: #1a1818; color: transparent;
+      border-radius: 2px; user-select: none;
+      transition: background .5s, color .5s; display: inline;
+    }
+    .classified.unlocked .blacked { background: transparent; }
+    .quantum-reveal { display: none; }
+    .classified.unlocked .quantum-reveal { display: block; animation: lc-fadein .5s ease; }
+    @keyframes lc-fadein { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+    .key-row { margin-top: 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .key-hint { font-family: var(--lc-font-hand); font-size: 14px; }
+    .key-input {
+      font-family: var(--lc-font-mono); font-size: 13px;
+      background: rgba(255,240,240,.5); border: 1px solid rgba(170,35,35,.3);
+      color: var(--ink); padding: 7px 13px; border-radius: 4px; outline: none; width: 190px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .key-input:focus { border-color: rgba(170,35,35,.6); box-shadow: 0 0 0 3px rgba(170,35,35,.1); }
+    #lc-key-fb { font-family: var(--lc-font-mono); font-size: 10px; transition: color .3s; }
+
+    /* ── Raw mode overlay ─────────────────────────────────────── */
+    .lc-raw-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(10,8,24,.88);
+      z-index: 900; overflow-y: auto;
+      padding: 56px 40px; justify-content: center; align-items: flex-start;
+    }
+    .lc-raw-overlay.on { display: flex; }
+    .raw-panel {
+      background: #0b0b18; border: 1px solid #3a3a88;
+      border-radius: 8px; padding: 40px; max-width: 780px; width: 100%;
+      box-shadow: 0 0 48px rgba(80,60,220,.2);
+    }
+    .raw-head {
+      font-family: var(--lc-font-mono); font-size: 10px; letter-spacing: 2px;
+      margin-bottom: 22px; padding-bottom: 12px;
+      border-bottom: 1px solid #1e1e38;
+    }
+    .raw-section-title { font-family: var(--lc-font-mono); font-size: 14px; margin-bottom: 14px; }
+    .token-stream { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 24px; }
+    .tok { display: inline-flex; flex-direction: column; align-items: center; cursor: help; }
+    .tok-id { font-family: var(--lc-font-mono); font-size: 7px; margin-bottom: 1px; }
+    .tok-text { font-family: var(--lc-font-mono); font-size: 13px; padding: 3px 6px; border-radius: 3px; }
+    .tok:nth-child(6n+1) .tok-text { background:rgba(90,110,255,.22); }
+    .tok:nth-child(6n+2) .tok-text { background:rgba(255,90,140,.18); }
+    .tok:nth-child(6n+3) .tok-text { background:rgba(80,215,170,.18); }
+    .tok:nth-child(6n+4) .tok-text { background:rgba(255,195,70,.18); }
+    .tok:nth-child(6n+5) .tok-text { background:rgba(195,90,255,.18); }
+    .tok:nth-child(6n+6) .tok-text { background:rgba(90,195,255,.18); }
+    .raw-stats {
+      font-family: var(--lc-font-mono); font-size: 10px;
+      display: flex; gap: 24px; flex-wrap: wrap;
+      padding-top: 14px; border-top: 1px solid #1e1e38; margin-top: 4px;
+    }
+    .lc-raw-close {
+      float: right; background: none; border: 1px solid #3a3a88;
+      font-family: var(--lc-font-mono); font-size: 11px;
+      padding: 6px 13px; cursor: pointer; border-radius: 4px; transition: all .2s;
+    }
+    .lc-raw-close:hover { background: rgba(80,60,200,.15); }
+
+    /* ── Doc footer ───────────────────────────────────────────── */
+    .doc-footer {
+      margin-top: 64px; padding-top: 18px;
+      border-top: 1px solid rgba(135,206,235,.28);
+      font-family: var(--lc-font-mono); font-size: 9px;
+      display: flex; justify-content: space-between;
+    }
+
+    /* ── NER legend ───────────────────────────────────────────── */
+    .lc-legend {
+      display: flex; gap: 14px; flex-wrap: wrap;
+      margin-bottom: 28px;
+      font-family: var(--lc-font-mono); font-size: 10px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+    /* ── Role tags (header) ───────────────────────────────────── */
+    .role-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+    .role-tag {
+      display: inline-block;
+      font-family: var(--lc-font-mono); font-size: 11px; font-weight: 500;
+      padding: 4px 12px; border-radius: 4px; letter-spacing: .3px;
+    }
+    .role-tag.nlp-eng  { background: var(--ner-org-bg);    border: 1px solid var(--ner-org-border); }
+    .role-tag.ai-res   { background: var(--ner-tech-bg);   border: 1px solid var(--ner-tech-border); }
+    .role-tag.quantum  { background: var(--ner-person-bg); border: 1px solid var(--ner-person-border); }
+    .role-tag.hci      { background: var(--ner-loc-bg);    border: 1px solid var(--ner-loc-border); }
+
+    /* ── Attention heatmap widget ─────────────────────────────── */
+    .attn-wrap {
+      margin: 28px 0;
+      background: rgba(248,246,255,.7);
+      border: 1px dashed rgba(135,206,235,.45);
+      border-radius: 6px; padding: 18px 18px 12px;
+      overflow-x: auto;
+    }
+    .attn-label {
+      font-family: var(--lc-font-mono); font-size: 9px; letter-spacing: 1.5px;
+      margin-bottom: 10px; text-align: center;
+    }
+    .attn-caption {
+      font-size: 12px; font-family: var(--lc-font-mono);
+      text-align: center; margin-top: 8px; letter-spacing: .5px;
+    }
+
+    /* ── Embedding scatter widget ─────────────────────────────── */
+    .embed-wrap {
+      margin: 28px 0;
+      background: rgba(248,246,255,.7);
+      border: 1px dashed rgba(200,180,255,.55);
+      border-radius: 6px; padding: 18px 18px 12px;
+      overflow-x: auto;
+    }
+    .embed-label {
+      font-family: var(--lc-font-mono); font-size: 9px; letter-spacing: 1.5px;
+      margin-bottom: 10px; text-align: center;
+    }
+    .embed-caption {
+      font-size: 12px; font-family: var(--lc-font-mono);
+      text-align: center; margin-top: 8px; letter-spacing: .5px;
+    }
+
+    /* ── Latency benchmark widget ────────────────────────────── */
+    .lc-bench-wrap {
+      margin: 28px 0;
+      background: rgba(248,246,255,.7);
+      border: 1px dashed rgba(100,190,130,.4);
+      border-radius: 6px; padding: 18px 18px 12px;
+      overflow-x: auto;
+    }
+    .bench-label {
+      font-family: var(--lc-font-mono); font-size: 9px; letter-spacing: 1.5px;
+      margin-bottom: 12px; text-align: center;
+    }
+    .bench-caption {
+      font-size: 12px; font-family: var(--lc-font-mono);
+      text-align: center; margin-top: 8px; letter-spacing: .5px;
+    }
+
+    /* ── VQE landscape widget ─────────────────────────────────── */
+    .lc-vqe-wrap {
+      margin: 28px 0;
+      background: rgba(20,15,40,.85);
+      border: 1px dashed rgba(190,140,255,.35);
+      border-radius: 6px; padding: 18px 18px 12px;
+      overflow-x: auto;
+    }
+    .vqe-label {
+      font-family: var(--lc-font-mono); font-size: 9px; letter-spacing: 1.5px;
+      margin-bottom: 10px; text-align: center;
+    }
+    .vqe-caption {
+      font-size: 12px; font-family: var(--lc-font-mono);
+      text-align: center; margin-top: 8px; letter-spacing: .5px;
+    }
+
+    /* ── Responsive ───────────────────────────────────────────── */
+    @media (max-width: 700px) {
+      .document { padding: 40px 28px 60px; }
+      .document::before { left: 20px; }
+      .mn { display: none; }
+      h1.doc-title { font-size: 32px; }
+      .lc-controls { top: 54px; }
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       OVERRIDE CUSTOM.CSS FORCED COLORS — .doc-wrap scope
+       (.doc-wrap prefix gives specificity 0,2,x vs custom.css 0,0,x)
+       ════════════════════════════════════════════════════════════ */
+
+    /* Body background */
+    body.list { background: var(--page-bg) !important; background-color: var(--page-bg) !important; }
+
+    /* Draft stamp */
+    .doc-wrap .draft-stamp { color: rgba(190,80,80,.55) !important; }
+
+    /* Paper meta */
+    .doc-wrap .paper-meta { color: var(--ink-light) !important; }
+    .doc-wrap .paper-meta span { color: var(--ink-light) !important; }
+
+    /* Subtitle */
+    .doc-wrap .doc-subtitle { color: var(--ink-light) !important; }
+
+    /* Affiliations separator */
+    .doc-wrap .affiliations .sep { color: rgba(100,100,140,.4) !important; }
+
+    /* Social pills */
+    .doc-wrap .lc-social-pill { color: var(--blue) !important; filter: brightness(.8) !important; }
+    .doc-wrap .lc-social-pill:hover { color: var(--blue) !important; filter: brightness(1) !important; background: rgba(135,206,235,.1) !important; }
+
+    /* Abstract */
+    .doc-wrap .abstract-label { color: var(--ink-light) !important; }
+    .doc-wrap .abstract p { color: var(--ink-light) !important; }
+
+    /* Section numbers */
+    .doc-wrap .sec-num { color: var(--blue) !important; filter: brightness(.8) !important; }
+
+    /* Paragraphs */
+    .doc-wrap .lc-para { color: var(--ink) !important; }
+
+    /* Card body text */
+    .doc-wrap .card-body { color: var(--ink-light) !important; }
+    .doc-wrap .card-body li { color: var(--ink-light) !important; }
+    .doc-wrap .card-status { color: rgba(100,100,170,.5) !important; }
+    .doc-wrap .card-meta { color: rgba(100,100,170,.55) !important; }
+    .doc-wrap .card-title { color: var(--ink) !important; }
+
+    /* Struck text */
+    .doc-wrap .struck { color: var(--ink-light) !important; }
+
+    /* Todo tag */
+    .doc-wrap .todo-tag { color: #b06000 !important; }
+
+    /* Publication elements */
+    .doc-wrap .pub-authors { color: var(--ink-light) !important; }
+    .doc-wrap .pub-title { color: var(--ink) !important; }
+    .doc-wrap .pub-venue { color: var(--blue) !important; filter: brightness(.75) !important; }
+    .doc-wrap .pub-entry::before { color: var(--ink-light) !important; }
+    .doc-wrap .pub-award { color: #7a5e00 !important; }
+
+    /* Dep-arc labels */
+    .doc-wrap .dep-label   { color: rgba(135,206,235,.75) !important; }
+    .doc-wrap .dep-caption { color: rgba(100,100,160,.5)  !important; }
+    .doc-wrap .dep-controls input  { color: #1a1a2e !important; background: rgba(255,255,255,.85) !important; }
+    .doc-wrap .dep-controls button { color: rgba(60,100,160,.9) !important; background: rgba(135,206,235,.18) !important; }
+    .doc-wrap .dep-controls button:hover { background: rgba(135,206,235,.38) !important; }
+    .doc-wrap .dep-loading { color: rgba(135,206,235,.6) !important; }
+
+    /* Margin notes */
+    .doc-wrap .mn { color: var(--margin-ink) !important; }
+    .doc-wrap .mn.red { color: rgba(180,50,50,.65) !important; }
+
+    /* NER tooltip colors */
+    .doc-wrap .ner::after { opacity: 0 !important; }
+    .doc-wrap .ner:hover::after { opacity: 1 !important; }
+    .doc-wrap .ner.person::after { color: #700000 !important; }
+    .doc-wrap .ner.org::after   { color: #00335a !important; }
+    .doc-wrap .ner.loc::after   { color: #003300 !important; }
+    .doc-wrap .ner.tech::after  { color: #300060 !important; }
+
+    /* Legend */
+    .doc-wrap .lc-legend { color: var(--ink-light) !important; }
+
+    /* Classified section */
+    .doc-wrap .cl-stamp { color: rgba(170,35,35,.65) !important; }
+    .doc-wrap .classified.unlocked .cl-stamp { color: rgba(30,130,80,.75) !important; border-color: rgba(30,130,80,.5) !important; }
+    .doc-wrap .cl-level { color: rgba(170,35,35,.45) !important; }
+    .doc-wrap .key-hint { color: rgba(170,35,35,.55) !important; }
+    .doc-wrap #lc-key-fb { color: #888 !important; }
+    .doc-wrap .quantum-reveal .lc-para { color: var(--ink) !important; }
+
+    /* Attention heatmap + embedding scatter + bench + vqe labels */
+    .doc-wrap .attn-label    { color: rgba(135,206,235,.75) !important; }
+    .doc-wrap .attn-caption  { color: rgba(100,100,160,.5)  !important; }
+    .doc-wrap .embed-label   { color: rgba(190,140,255,.75) !important; }
+    .doc-wrap .embed-caption { color: rgba(100,100,160,.5)  !important; }
+    .doc-wrap .bench-label   { color: rgba(80,180,110,.75)  !important; }
+    .doc-wrap .bench-caption { color: rgba(100,100,160,.5)  !important; }
+    /* VQE widget sits on a dark background — punch through the !important chain */
+    .doc-wrap .lc-vqe-wrap .vqe-label   { color: rgba(190,140,255,.8)  !important; }
+    .doc-wrap .lc-vqe-wrap .vqe-caption { color: rgba(160,140,200,.55) !important; }
+
+    /* Role tags — text inherits ink, no override needed; backgrounds come from CSS vars */
+    .doc-wrap .role-tag { color: var(--ink) !important; }
+
+    /* Doc footer */
+    .doc-wrap .doc-footer { color: rgba(100,100,150,.45) !important; }
+    .doc-wrap .doc-footer span { color: rgba(100,100,150,.45) !important; }
+
+    /* Raw mode controls */
+    .lc-controls .lc-raw-btn { color: #d8d8ff !important; }
+    .lc-controls .lc-mode-label { color: var(--margin-ink) !important; opacity: .7 !important; }
+
+    /* Raw mode overlay (fixed, not inside .doc-wrap) */
+    .lc-raw-overlay .raw-head { color: #6666aa !important; }
+    .lc-raw-overlay .raw-head span { color: #6666aa !important; }
+    .lc-raw-overlay .raw-section-title { color: #9999dd !important; }
+    .lc-raw-overlay .tok-id { color: rgba(130,130,190,.45) !important; }
+    .lc-raw-overlay .tok:nth-child(6n+1) .tok-text { color: #aabbff !important; }
+    .lc-raw-overlay .tok:nth-child(6n+2) .tok-text { color: #ffaac8 !important; }
+    .lc-raw-overlay .tok:nth-child(6n+3) .tok-text { color: #88ffd0 !important; }
+    .lc-raw-overlay .tok:nth-child(6n+4) .tok-text { color: #ffdda0 !important; }
+    .lc-raw-overlay .tok:nth-child(6n+5) .tok-text { color: #ddaaff !important; }
+    .lc-raw-overlay .tok:nth-child(6n+6) .tok-text { color: #aadfff !important; }
+    .lc-raw-overlay .raw-stats span { color: #55558a !important; }
+    .lc-raw-overlay .lc-raw-close { color: #7777aa !important; }
+    .lc-raw-overlay .lc-raw-close:hover { color: #aaaaee !important; }
+    </style>
+</head>
+
+<body class="list" id="top">
+
+{{- partialCached "header.html" . .Page }}
+
+<!-- ── RAW MODE controls ────────────────────────────────────── -->
+<div class="lc-controls">
+  <button class="lc-raw-btn" id="lcRawBtn" onclick="lcToggleRaw()">⚙ RAW MODE</button>
+  <div class="lc-mode-label" id="lcModeLabel">surface view</div>
+</div>
+
+<!-- ── Raw mode overlay ─────────────────────────────────────── -->
+<div class="lc-raw-overlay" id="lcRawOverlay">
+  <div class="raw-panel">
+    <button class="lc-raw-close" onclick="lcToggleRaw()">✕ CLOSE</button>
+    <div class="raw-head" id="lcRawHead">GPT-2 BPE TOKENIZER &nbsp;·&nbsp; VOCAB_SIZE: 50,257 &nbsp;·&nbsp; src: bio.txt</div>
+    <div class="raw-section-title">token stream →</div>
+    <div class="token-stream" id="lcTokenStream"></div>
+    <div class="raw-stats" id="lcRawStats"></div>
+  </div>
+</div>
+
+<!-- ── Living Corpus document ────────────────────────────────── -->
+<div class="lc-wrap">
+<div class="doc-wrap">
+<div class="document">
+
+  <!-- Header -->
+  <header class="doc-header">
+    <div class="draft-stamp">DRAFT &nbsp;v1.0</div>
+    <div class="paper-meta">
+      <span>arxiv: cs.CL/2025.aryasuneesh-personal</span>
+      <span><span class="live-dot"></span>Under Continuous Revision</span>
+    </div>
+
+    <h1 class="doc-title">Arya Suneesh</h1>
+    <div class="role-tags">
+      <span class="role-tag nlp-eng">NLP Engineer</span>
+      <span class="role-tag ai-res">AI Researcher</span>
+      <span class="role-tag quantum">Quantum Enthusiast</span>
+      <span class="role-tag hci">Human-Centered AI</span>
+    </div>
+
+    <div class="social-row">
+      <a class="lc-social-pill" href="https://github.com/aryasuneesh" target="_blank" rel="noopener">GitHub</a>
+      <a class="lc-social-pill" href="https://www.linkedin.com/in/arya-suneesh/" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="lc-social-pill" href="https://scholar.google.com/citations?user=0tq3v-4AAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar</a>
+      <a class="lc-social-pill" href="https://aryasuneesh.substack.com" target="_blank" rel="noopener">Substack</a>
+      <a class="lc-social-pill" href="https://www.youtube.com/@aryasuneesh/" target="_blank" rel="noopener">YouTube</a>
+      <a class="lc-social-pill" href="https://x.com/arya_suneesh" target="_blank" rel="noopener">X / Twitter</a>
+      <a class="lc-social-pill" href="/Arya_Suneesh_Resume_Website.pdf" target="_blank" rel="noopener">Resume ↗</a>
+    </div>
+
+    <div class="abstract">
+      <div class="abstract-label">Abstract</div>
+      <p>Building systems that read between the lines. Interested in how language encodes meaning, how <span class="hl-b">attention mechanisms</span> mirror human cognition, and what happens at the boundary between classical and <span class="hl-p">quantum computation</span>. Equally drawn to <span class="hl-b">human-centered AI</span> — building tools that adapt to people rather than demanding people adapt to tools. One of 16 selected globally for the <span class="ner org" data-label="ORG">MCQST</span> Summer Bachelor Program; DAAD-WISE Scholar; 3rd place at SemEval&nbsp;2025 &amp; CLEF CheckThat!&nbsp;2025.</p>
+    </div>
+  </header>
+
+  <!-- NER legend -->
+  <div class="lc-legend">
+    <span style="opacity:.5;font-size:9px;letter-spacing:1px;align-self:center;">ENTITIES →</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--ner-person-bg);border:1px solid var(--ner-person-border)"></span>PERSON</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--ner-org-bg);border:1px solid var(--ner-org-border)"></span>ORG</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--ner-loc-bg);border:1px solid var(--ner-loc-border)"></span>GPE</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--ner-tech-bg);border:1px solid var(--ner-tech-border)"></span>TECH</span>
+    <span style="opacity:.4;margin-left:6px;font-size:9px;align-self:center;">hover any entity to reveal label</span>
+  </div>
+
+  <!-- § 1 Biography -->
+  <section class="sec">
+    <div class="sec-head">
+      <span class="sec-num">§ 1</span>
+      <h2 class="sec-title">Biography</h2>
+    </div>
+
+    <div class="lc-para" style="position:relative;">
+      <span class="mn l red">revised<br>May 2025</span>
+      <span class="ner person" data-label="PERSON">Arya Suneesh</span> is an
+      <span class="hl-y">NLP researcher and engineer</span> whose work spans language, finance, and quantum computing.
+      At <span class="ner org" data-label="ORG">TIFIN RM</span> she built
+      <span class="hl-b">semantic caching layers and LLM agents for wealth management intelligence</span>,
+      reducing query latency by 40–70% across 57 financial query types.
+      She completed her B.Tech.&nbsp;(Hons.) in Computer Science at
+      <span class="ner org" data-label="ORG">IIIT Kottayam</span> with a GPA of
+      <span class="hl-y">9.64/10</span>, and was selected as one of
+      <span class="hl-p">16 participants worldwide</span> for the
+      <span class="ner org" data-label="ORG">MCQST</span> Summer Bachelor Program at the
+      <span class="ner org" data-label="ORG">Walther-Meißner-Institut</span> in
+      <span class="ner loc" data-label="GPE">Munich</span>.
+      <span class="mn r">GPA verified<br>May 2025</span>
+    </div>
+
+    <div class="lc-para" style="position:relative;">
+      A thread running through her work is a <span class="hl-b">human-centered approach to AI</span> —
+      building systems that adapt to people rather than the reverse.
+      This came into sharpest focus during her <span class="hl-y">DAAD-WISE residency</span> at
+      <span class="ner org" data-label="ORG">Universität der Künste Berlin</span> and the
+      <span class="ner org" data-label="ORG">Einstein Center Digital Future</span>,
+      where she worked in
+      <span class="ner tech" data-label="TECH">human-computer interaction (HCI)</span>,
+      developing <span class="ner tech" data-label="TECH">ASR models</span> for the Reading Primer —
+      a personalised learning device that meets readers where they are.
+      She also serves as Community Lead, ML Industry at
+      <span class="ner org" data-label="ORG">Cohere Labs Open Science Community</span>.
+      <span class="mn r" style="top:24px;">HCI thread<br>explicit now</span>
+    </div>
+
+    <!-- Dependency arc -->
+    <div class="dep-wrap">
+      <div class="dep-label">◈ DEPENDENCY PARSE · compromise.js · en (interactive, client-side)</div>
+      <div class="dep-controls">
+        <input id="lc-dep-input" type="text"
+               value="She engineers systems that learn from human language"
+               placeholder="type any English sentence and press Enter or parse →" />
+        <button id="lc-dep-btn">parse →</button>
+      </div>
+      <div id="lc-dep-svg" style="overflow-x:auto; min-height:170px;">
+        <div class="dep-loading">loading NLP library…</div>
+      </div>
+      <div class="dep-caption">
+        nsubj &nbsp;·&nbsp; dobj &nbsp;·&nbsp; relcl &nbsp;·&nbsp; prep &nbsp;·&nbsp; pobj &nbsp;·&nbsp; amod
+        &nbsp;&nbsp;|&nbsp;&nbsp; <span style="color:rgba(160,100,220,.8)">purple arc = cross-clause</span>
+        &nbsp;&nbsp;|&nbsp;&nbsp; max 12 tokens
+      </div>
+    </div>
+
+    <!-- Attention heatmap -->
+    <div class="attn-wrap">
+      <div class="attn-label">◈ SELF-ATTENTION · BERT-base layer 8 head 5 · "attention maps meaning across token boundaries"</div>
+      <div id="lcAttnHeatmap" style="overflow-x:auto;"></div>
+      <div class="attn-caption">query (row) → key (col) · cell opacity = attention weight · diagonal = self-attention · darker = higher weight</div>
+    </div>
+
+    <!-- Concept embedding projection -->
+    <div class="embed-wrap">
+      <div class="embed-label">◈ CONCEPT EMBEDDING · UMAP(n_neighbors=15, min_dist=0.1) · research domains</div>
+      <svg width="100%" height="210" viewBox="0 0 660 210" preserveAspectRatio="xMidYMid meet" style="font-family:'PT Mono',monospace;">
+
+        <!-- bridge lines between clusters -->
+        <line x1="192" y1="105" x2="248" y2="68"  stroke="rgba(135,206,235,.25)" stroke-width="1.2" stroke-dasharray="4,3"/>
+        <line x1="192" y1="105" x2="318" y2="162" stroke="rgba(119,204,136,.25)" stroke-width="1.2" stroke-dasharray="4,3"/>
+        <line x1="192" y1="105" x2="458" y2="95"  stroke="rgba(190,140,255,.18)" stroke-width="1"   stroke-dasharray="6,4"/>
+        <line x1="248" y1="68"  x2="318" y2="162" stroke="rgba(135,206,235,.15)" stroke-width="1"   stroke-dasharray="4,3"/>
+
+        <!-- NLP cluster -->
+        <ellipse cx="185" cy="105" rx="58" ry="42" fill="rgba(135,206,235,.10)" stroke="rgba(135,206,235,.45)" stroke-width="1" stroke-dasharray="3,2"/>
+        <circle cx="168" cy="88"  r="4" fill="rgba(135,206,235,.85)"/>
+        <circle cx="195" cy="80"  r="4" fill="rgba(135,206,235,.85)"/>
+        <circle cx="155" cy="108" r="4" fill="rgba(135,206,235,.85)"/>
+        <circle cx="200" cy="112" r="4" fill="rgba(135,206,235,.85)"/>
+        <circle cx="175" cy="128" r="3.5" fill="rgba(135,206,235,.7)"/>
+        <circle cx="215" cy="98"  r="3.5" fill="rgba(135,206,235,.7)"/>
+        <text x="168" y="84"  font-size="8" fill="rgba(60,120,180,.85)" text-anchor="middle">RAG</text>
+        <text x="197" y="76"  font-size="8" fill="rgba(60,120,180,.85)" text-anchor="middle">NER</text>
+        <text x="148" y="104" font-size="8" fill="rgba(60,120,180,.85)" text-anchor="end">ASR</text>
+        <text x="208" y="108" font-size="8" fill="rgba(60,120,180,.85)">LLM</text>
+        <text x="175" y="142" font-size="8" fill="rgba(60,120,180,.75)" text-anchor="middle">Transformers</text>
+        <text x="218" y="95"  font-size="8" fill="rgba(60,120,180,.75)">fine-tuning</text>
+        <text x="185" y="158" font-size="9" fill="rgba(60,120,180,.55)" text-anchor="middle" font-style="italic">NLP</text>
+
+        <!-- Finance cluster -->
+        <ellipse cx="278" cy="58" rx="48" ry="28" fill="rgba(135,206,235,.07)" stroke="rgba(135,206,235,.3)" stroke-width="1" stroke-dasharray="3,2"/>
+        <circle cx="258" cy="52"  r="3.5" fill="rgba(100,180,220,.8)"/>
+        <circle cx="282" cy="46"  r="3.5" fill="rgba(100,180,220,.8)"/>
+        <circle cx="270" cy="66"  r="3.5" fill="rgba(100,180,220,.8)"/>
+        <circle cx="298" cy="58"  r="3"   fill="rgba(100,180,220,.7)"/>
+        <text x="248" y="49"  font-size="8" fill="rgba(40,100,160,.8)" text-anchor="end">Sem. Cache</text>
+        <text x="285" y="42"  font-size="8" fill="rgba(40,100,160,.8)">FinTech</text>
+        <text x="266" y="80"  font-size="8" fill="rgba(40,100,160,.8)" text-anchor="middle">Financial NLP</text>
+        <text x="278" y="96"  font-size="9" fill="rgba(40,100,160,.45)" text-anchor="middle" font-style="italic">Finance</text>
+
+        <!-- Quantum cluster -->
+        <ellipse cx="468" cy="92" rx="62" ry="40" fill="rgba(190,140,255,.10)" stroke="rgba(190,140,255,.45)" stroke-width="1" stroke-dasharray="3,2"/>
+        <circle cx="448" cy="78"  r="4"   fill="rgba(185,130,255,.85)"/>
+        <circle cx="475" cy="72"  r="4"   fill="rgba(185,130,255,.85)"/>
+        <circle cx="455" cy="100" r="4"   fill="rgba(185,130,255,.85)"/>
+        <circle cx="490" cy="96"  r="4"   fill="rgba(185,130,255,.85)"/>
+        <circle cx="478" cy="112" r="3.5" fill="rgba(185,130,255,.7)"/>
+        <circle cx="505" cy="80"  r="3.5" fill="rgba(185,130,255,.7)"/>
+        <text x="440" y="74"  font-size="8" fill="rgba(120,60,200,.85)" text-anchor="end">VQE</text>
+        <text x="478" y="68"  font-size="8" fill="rgba(120,60,200,.85)">QML</text>
+        <text x="448" y="96"  font-size="8" fill="rgba(120,60,200,.85)" text-anchor="end">QCNN</text>
+        <text x="493" y="93"  font-size="8" fill="rgba(120,60,200,.85)">shot-noise</text>
+        <text x="478" y="126" font-size="8" fill="rgba(120,60,200,.75)" text-anchor="middle">barren plateau</text>
+        <text x="508" y="77"  font-size="8" fill="rgba(120,60,200,.75)">qubits</text>
+        <text x="468" y="145" font-size="9" fill="rgba(120,60,200,.5)" text-anchor="middle" font-style="italic">Quantum</text>
+
+        <!-- HCI cluster -->
+        <ellipse cx="325" cy="168" rx="55" ry="28" fill="rgba(119,204,136,.10)" stroke="rgba(119,204,136,.45)" stroke-width="1" stroke-dasharray="3,2"/>
+        <circle cx="302" cy="162" r="4"   fill="rgba(80,180,100,.85)"/>
+        <circle cx="330" cy="155" r="4"   fill="rgba(80,180,100,.85)"/>
+        <circle cx="348" cy="170" r="3.5" fill="rgba(80,180,100,.8)"/>
+        <circle cx="310" cy="178" r="3.5" fill="rgba(80,180,100,.75)"/>
+        <text x="295" y="158" font-size="8" fill="rgba(30,120,60,.85)" text-anchor="end">Reading Primer</text>
+        <text x="333" y="151" font-size="8" fill="rgba(30,120,60,.85)">HCI</text>
+        <text x="352" y="167" font-size="8" fill="rgba(30,120,60,.8)">udk.ai</text>
+        <text x="304" y="192" font-size="8" fill="rgba(30,120,60,.75)" text-anchor="middle">Learning Tech</text>
+        <text x="325" y="206" font-size="9" fill="rgba(30,120,60,.5)" text-anchor="middle" font-style="italic">HCI</text>
+
+        <!-- bridge labels -->
+        <text x="218" y="82"  font-size="7.5" fill="rgba(100,100,160,.5)" text-anchor="middle" transform="rotate(-30,218,82)">NLP↔Finance</text>
+        <text x="252" y="140" font-size="7.5" fill="rgba(80,160,100,.45)" text-anchor="middle" transform="rotate(28,252,140)">NLP↔HCI</text>
+        <text x="325" y="100" font-size="7.5" fill="rgba(160,100,220,.4)" text-anchor="middle">NLP↔Quantum</text>
+      </svg>
+      <div class="embed-caption">each point = a research concept · cluster colour matches role-tag legend · dashed edges = cross-domain bridges in Arya's work</div>
+    </div>
+
+  </section>
+
+  <!-- § 2 Experience -->
+  <section class="sec">
+    <div class="sec-head">
+      <span class="sec-num">§ 2</span>
+      <h2 class="sec-title">Experience</h2>
+    </div>
+
+    <div class="card">
+      <span class="card-status">[COMPLETED]</span>
+      <div class="card-title">
+        NLP Engineer — <span class="ner org" data-label="ORG">TIFIN RM</span>
+        <span class="ner loc" data-label="GPE"> · Bengaluru</span>
+      </div>
+      <div class="card-meta">May 2025 – Jan 2026</div>
+      <div class="card-body" style="position:relative;">
+        <ul>
+          <li>Engineered a <span class="hl-b">semantic caching layer</span> using <span class="ner tech" data-label="TECH">MPNet embeddings</span>; reduced response latency by <span class="hl-y">40–70%</span> across 57 financial query types in the client diagnostics module.</li>
+          <li>Optimized <span class="ner tech" data-label="TECH">LLM agents</span> for financial advisory workflows via prompt engineering, data filtering, and token budgeting; extended SIP/STP/SWP coverage with fault-tolerant fallback logic.</li>
+          <li>Built anonymization pipelines and evaluation frameworks; resolved critical production bugs in context routing and response generation.</li>
+        </ul>
+        <span class="mn r" style="font-size:12px;">add eval<br>benchmarks</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="card-status">[COMPLETED]</span>
+      <div class="card-title">
+        Student Researcher — <span class="ner org" data-label="ORG">Walther-Meißner-Institut (WMI)</span>
+        <span class="ner loc" data-label="GPE"> · Munich</span>
+      </div>
+      <div class="card-meta">Jul 2025 – Aug 2025 &nbsp;·&nbsp; MCQST Summer Bachelor Program &nbsp;·&nbsp; 1 of 16 worldwide</div>
+      <div class="card-body">
+        <ul>
+          <li>Developed a <span class="hl-b">shot-based simulation framework</span> for realistic quantum measurements with post-selection to preserve gauge symmetry; designed for a <span class="hl-p">17-qubit superconducting chip</span>.</li>
+          <li>Characterized <span class="ner tech" data-label="TECH">VQE</span> optimization landscapes across shot-noise levels; quantified the impact of measurement statistics on convergence behavior.</li>
+          <li>Contributed to experiment design and algorithm architecture within an international team of six researchers.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="card-status">[COMPLETED]</span>
+      <div class="card-title">
+        AI Research Intern — <span class="ner org" data-label="ORG">TIFIN RM</span>
+        <span class="ner loc" data-label="GPE"> · Bengaluru</span>
+      </div>
+      <div class="card-meta">Jan 2025 – Apr 2025</div>
+      <div class="card-body">
+        <ul>
+          <li>Built semantic caching system for the client diagnostic tool (<span class="hl-y">~60% latency reduction</span> across 57 query types).</li>
+          <li>Improved LLM response quality via data-filter rules and structured prompt variants; diagnosed <span class="ner tech" data-label="TECH">jq</span> command inconsistencies causing latency spikes in advisor portfolios with 10,000+ clients.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Latency benchmark widget -->
+    <div class="lc-bench-wrap">
+      <div class="bench-label">◈ LATENCY BENCHMARK · semantic caching (MPNet embeddings) vs. baseline · client diagnostic module</div>
+      <svg width="100%" height="202" viewBox="0 0 660 202" preserveAspectRatio="xMidYMid meet">
+        <!-- axis line -->
+        <line x1="134" y1="10" x2="134" y2="192" stroke="rgba(100,190,130,.3)" stroke-width="1"/>
+        <!-- legend -->
+        <rect x="430" y="6" width="10" height="8" rx="2" fill="rgba(135,206,235,.45)"/>
+        <text x="444" y="14" font-size="8" font-family="PT Mono,monospace" fill="rgba(80,120,160,.7)">baseline</text>
+        <rect x="498" y="6" width="10" height="8" rx="2" fill="rgba(80,190,120,.65)"/>
+        <text x="512" y="14" font-size="8" font-family="PT Mono,monospace" fill="rgba(40,130,70,.7)">cached</text>
+        <!-- ── Row 1: Client Diagnostics  −60% ── -->
+        <text x="128" y="35"  font-size="9" font-family="PT Mono,monospace" fill="rgba(60,60,120,.7)" text-anchor="end">Client Diagnostics</text>
+        <rect x="136" y="24"  width="430" height="12" rx="2" fill="rgba(135,206,235,.22)" stroke="rgba(135,206,235,.5)" stroke-width=".8"/>
+        <rect x="136" y="38"  width="172" height="8"  rx="2" fill="rgba(80,190,120,.65)"/>
+        <text x="316" y="47"  font-size="8" font-family="PT Mono,monospace" fill="rgba(30,130,60,.85)">−60%</text>
+        <!-- ── Row 2: SIP Advisory  −65% ── -->
+        <text x="128" y="68"  font-size="9" font-family="PT Mono,monospace" fill="rgba(60,60,120,.7)" text-anchor="end">SIP Advisory</text>
+        <rect x="136" y="57"  width="430" height="12" rx="2" fill="rgba(135,206,235,.22)" stroke="rgba(135,206,235,.5)" stroke-width=".8"/>
+        <rect x="136" y="71"  width="150" height="8"  rx="2" fill="rgba(80,190,120,.65)"/>
+        <text x="294" y="80"  font-size="8" font-family="PT Mono,monospace" fill="rgba(30,130,60,.85)">−65%</text>
+        <!-- ── Row 3: SWP Queries  −70% ── -->
+        <text x="128" y="101" font-size="9" font-family="PT Mono,monospace" fill="rgba(60,60,120,.7)" text-anchor="end">SWP Queries</text>
+        <rect x="136" y="90"  width="430" height="12" rx="2" fill="rgba(135,206,235,.22)" stroke="rgba(135,206,235,.5)" stroke-width=".8"/>
+        <rect x="136" y="104" width="129" height="8"  rx="2" fill="rgba(80,190,120,.65)"/>
+        <text x="273" y="113" font-size="8" font-family="PT Mono,monospace" fill="rgba(30,130,60,.85)">−70%</text>
+        <!-- ── Row 4: Portfolio Overview  −55% ── -->
+        <text x="128" y="134" font-size="9" font-family="PT Mono,monospace" fill="rgba(60,60,120,.7)" text-anchor="end">Portfolio Overview</text>
+        <rect x="136" y="123" width="430" height="12" rx="2" fill="rgba(135,206,235,.22)" stroke="rgba(135,206,235,.5)" stroke-width=".8"/>
+        <rect x="136" y="137" width="193" height="8"  rx="2" fill="rgba(80,190,120,.65)"/>
+        <text x="337" y="146" font-size="8" font-family="PT Mono,monospace" fill="rgba(30,130,60,.85)">−55%</text>
+        <!-- ── Row 5: Advisory Q&amp;A  −42% ── -->
+        <text x="128" y="167" font-size="9" font-family="PT Mono,monospace" fill="rgba(60,60,120,.7)" text-anchor="end">Advisory Q&amp;A</text>
+        <rect x="136" y="156" width="430" height="12" rx="2" fill="rgba(135,206,235,.22)" stroke="rgba(135,206,235,.5)" stroke-width=".8"/>
+        <rect x="136" y="170" width="249" height="8"  rx="2" fill="rgba(80,190,120,.65)"/>
+        <text x="393" y="179" font-size="8" font-family="PT Mono,monospace" fill="rgba(30,130,60,.85)">−42%</text>
+        <!-- baseline label -->
+        <text x="570" y="197" font-size="8" font-family="PT Mono,monospace" fill="rgba(100,140,180,.5)" text-anchor="end">baseline →</text>
+      </svg>
+      <div class="bench-caption">40–70% response-latency reduction across 57 financial query types · baseline = uncached LLM call · values representative</div>
+    </div>
+
+    <div class="card">
+      <span class="card-status">[COMPLETED]</span>
+      <div class="card-title">
+        AI Research Intern — <span class="ner org" data-label="ORG">MyFi by TIFIN</span>
+        <span class="ner loc" data-label="GPE"> · Bengaluru</span>
+      </div>
+      <div class="card-meta">Oct 2024 – Dec 2024</div>
+      <div class="card-body">
+        <ul>
+          <li>Benchmarked <span class="hl-b">conversational models</span> for a mobile financial assistant; evaluated quality-latency tradeoffs for production deployment.</li>
+          <li>Integrated <span class="hl-y">Indian language and colloquial input</span> support into the MyFi stack.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="card-status">[COMPLETED]</span>
+      <div class="card-title">
+        Research Intern (DAAD-WISE Scholar) — <span class="ner org" data-label="ORG">UdK Berlin</span> / <span class="ner org" data-label="ORG">ECDF</span>
+        <span class="ner loc" data-label="GPE"> · Berlin</span>
+      </div>
+      <div class="card-meta">May 2024 – Jul 2024 &nbsp;·&nbsp; DAAD-WISE Scholarship &nbsp;·&nbsp; 1 of 250 selected from India &nbsp;·&nbsp; <span class="hl-b">Human-Centered Data Science · HCI</span></div>
+      <div class="card-body">
+        <ul>
+          <li>Worked at the intersection of <span class="ner tech" data-label="TECH">human-computer interaction</span> and <span class="ner tech" data-label="TECH">human-centered data science</span> under Prof. Daniel D. Hromada; built NLP components that adapt to individual readers rather than imposing fixed curricula.</li>
+          <li>Developed <span class="ner tech" data-label="TECH">speech recognition</span> components and evaluated <span class="ner tech" data-label="TECH">ASR models</span> for on-device learning modules in the Reading Primer device; iteratively advanced the Fibel 4 prototype across multiple hardware-software cycles.</li>
+          <li>Adapted personalised NLP models from <span class="ner org" data-label="ORG">udk.ai</span> and validated their integration into the Reading Primer pipeline.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- § 3 Projects -->
+  <section class="sec">
+    <div class="sec-head">
+      <span class="sec-num">§ 3</span>
+      <h2 class="sec-title">Selected Projects</h2>
+    </div>
+
+    <div class="card" style="position:relative;">
+      <span class="card-status">[ACTIVE]</span>
+      <div class="card-title">Reading Primer</div>
+      <div class="card-meta">UdK Berlin / ECDF · DAAD-WISE · 2024</div>
+      <div class="card-body">
+        An <span class="ner tech" data-label="TECH">NLP-powered</span> reading companion that adapts difficulty and surfaces connections across texts — designed for on-device, low-latency learning.
+        <span class="hl-y">Core insight:</span> reading comprehension is a graph traversal problem; every unfamiliar word is an edge to a new subgraph.
+        Built ASR and personalised NLP components integrated into the <span class="ner org" data-label="ORG">udk.ai</span> pipeline.
+      </div>
+      <span class="mn r" style="top:36px;font-size:12px;">primary<br>project</span>
+    </div>
+
+    <div class="card">
+      <span class="card-status">[PUBLISHED]</span>
+      <div class="card-title">
+        QCNN-MFND — <span class="ner tech" data-label="TECH">Quantum CNN for Multimodal Fake News Detection</span>
+      </div>
+      <div class="card-meta">Honours Thesis · IIIT Kottayam · 2025 &nbsp;·&nbsp; QNLP @ AACL-IJCNLP 2025, Mumbai</div>
+      <div class="card-body">
+        A novel <span class="hl-b">quantum convolutional neural network</span> framework for detecting fake news across text and image modalities in social media. Combines classical multimodal encoders with <span class="ner tech" data-label="TECH">parameterised quantum circuits</span> to exploit entanglement for cross-modal feature fusion.
+        Supervised by <span class="ner person" data-label="PERSON">Dr. Balasubramanian P</span>.
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="card-status">[SEE §5]</span>
+      <div class="card-title">
+        Quantum VQE &nbsp;<span class="ner tech" data-label="TECH">Variational Quantum Eigensolver</span>
+      </div>
+      <div class="card-meta">Walther-Meißner-Institut · MCQST · 2025</div>
+      <div class="card-body">
+        Shot-based simulation and optimisation of <span class="ner tech" data-label="TECH">VQE</span> circuits on a 17-qubit superconducting processor. Investigation of barren plateau phenomena under realistic shot-noise conditions.
+        <span class="struck">Won't explain further here</span>
+        → full write-up in §5 (access required).
+      </div>
+    </div>
+  </section>
+
+  <!-- § 4 Publications -->
+  <section class="sec">
+    <div class="sec-head">
+      <span class="sec-num">§ 4</span>
+      <h2 class="sec-title">Publications</h2>
+    </div>
+    <div class="pub-list">
+
+      <div class="pub-entry">
+        <span class="pub-authors">Suneesh, A., Balasubramanian P. </span>
+        <span class="pub-title">"QCNN-MFND: A Novel Quantum CNN Framework for Multimodal Fake News Detection in Social Media." </span>
+        <span class="pub-venue">QNLP Workshop, AACL-IJCNLP 2025, Mumbai.</span>
+      </div>
+
+      <div class="pub-entry">
+        <span class="pub-authors">Hazarika, B., Suneesh, A., Devadiga, P., Rajpoot, P.K., Suresh, A.B., Hussain, A.I. </span>
+        <span class="pub-title">"Multilingual Conversational AI for Financial Assistance: Bridging Language Barriers in Indian FinTech." </span>
+        <span class="pub-venue">FinAI Workshop, CIKM 2025, Seoul.</span>
+      </div>
+
+      <div class="pub-entry">
+        <span class="pub-authors">Sharma, M., Suneesh, A., Jain, M., Rajpoot, P.K., Devadiga, P. et al. </span>
+        <span class="pub-title">"TIFIN at CheckThat! 2025: Reasoning-Guided Claim Normalization for Noisy Multilingual Social Media Posts." </span>
+        <span class="pub-venue">CheckThat! Workshop, CLEF 2025, Barcelona.</span>
+        <span class="pub-award">3rd place · Task 2</span>
+      </div>
+
+      <div class="pub-entry">
+        <span class="pub-authors">Gurumurthy, K., Shrivastava, A., Rajpoot, P.K., Devadiga, P., Hazarika, B., Jain, M., Sharma, M., Suneesh, A. et al. </span>
+        <span class="pub-title">"TIFIN at CheckThat! 2025: Cross-Lingual Subjectivity Classification in News through Monolingual, Multilingual, and Zero-Shot Learning." </span>
+        <span class="pub-venue">CheckThat! Workshop, CLEF 2025, Barcelona.</span>
+      </div>
+
+      <div class="pub-entry">
+        <span class="pub-authors">Hazarika, B., Devadiga, P., Rajpoot, P.K., Baliga, A.U., Gurumurthy, K., Jain, M., Sharma, M., Shrivastava, A., Suneesh, A., Suresh, A.B. </span>
+        <span class="pub-title">"TIFIN at CheckThat! 2025: X-VERIFY – Multi-lingual NLI-based Fact Checking with Condensed Evidence." </span>
+        <span class="pub-venue">CheckThat! Workshop, CLEF 2025, Barcelona.</span>
+      </div>
+
+      <div class="pub-entry">
+        <span class="pub-authors">Devadiga, P., Suneesh, A., Rajpoot, P.K., Hazarika, B., Baliga, A.U. </span>
+        <span class="pub-title">"TIFIN India at SemEval-2025: Harnessing Translation to Overcome Multilingual IR Challenges in Fact-Checked Claim Retrieval." </span>
+        <span class="pub-venue">SemEval 2025, ACL 2025, Vienna.</span>
+        <span class="pub-award">3rd place · Task 7</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- § 5 Classified -->
+  <section class="sec">
+    <div class="sec-head">
+      <span class="sec-num">§ 5</span>
+      <h2 class="sec-title" style="color:rgba(170,35,35,.6);" id="lc-cl-title">██████████ ██████████</h2>
+    </div>
+
+    <div class="classified" id="lcClassified">
+      <div class="cl-banner">
+        <span class="cl-stamp" id="lc-cl-stamp">⚠ &nbsp;CLASSIFIED</span>
+        <span class="cl-level">CLEARANCE LEVEL: QUANTUM-1</span>
+      </div>
+
+      <p class="lc-para">
+        <span class="redacted-block">████████████████████████████████████████████████████████████████████</span>
+        <span class="redacted-block">████████████████████████████ ███████████ ██████████████████████████</span>
+        Research conducted at
+        <span class="blacked">Walther-Meißner-Institut, Munich</span>
+        under the <span class="blacked">MCQST Summer Bachelor Program</span>
+        using <span class="blacked">shot-based VQE simulation</span>
+        on a <span class="blacked">17-qubit superconducting processor</span>.
+      </p>
+
+      <div class="quantum-reveal">
+        <div class="lc-para">
+          Research conducted at <span class="ner org" data-label="ORG">Walther-Meißner-Institut (WMI)</span> in
+          <span class="ner loc" data-label="GPE">Munich</span> under the
+          <span class="ner org" data-label="ORG">MCQST</span> Summer Bachelor Program (1 of 16 selected worldwide).
+          Developed a <span class="ner tech" data-label="TECH">shot-based simulation framework</span> for realistic
+          quantum measurements with post-selection to preserve gauge symmetry, designed for deployment
+          on a <span class="hl-p">17-qubit superconducting chip</span>.
+        </div>
+        <div class="lc-para" style="position:relative;">
+          Key finding: <span class="hl-b">VQE optimization landscapes exhibit the barren plateau phenomenon</span>
+          even under finite shot-noise — vanishing gradients that emerge in high-dimensional Hilbert spaces
+          are compounded by measurement statistics in ways the noiseless theory obscures.
+          The boundary between classical and quantum ML is more porous than either field admits.
+          <span class="mn r" style="font-size:12px;">key finding —<br>write-up pending</span>
+        </div>
+        <div class="lc-para">
+          Characterised convergence behaviour across varying shot-noise levels in collaboration with an
+          international team of six researchers. Contributed to experiment design and algorithm
+          architecture for the <span class="ner org" data-label="ORG">WMI</span> 17-qubit processor.
+        </div>
+
+        <!-- VQE parameter landscape -->
+        <div class="lc-vqe-wrap">
+          <div class="vqe-label">◈ VQE PARAMETER LANDSCAPE · θ₁ × θ₂ sweep [0, 2π] · ⟨E⟩ under finite shot-noise</div>
+          <div id="lcVqeLandscape" style="text-align:center;"></div>
+          <div class="vqe-caption">dark = low energy (minimum) · flat plateau = vanishing gradients → barren plateau · gradient ≈ 0 for &gt;90% of parameter space</div>
+        </div>
+      </div>
+
+      <div class="key-row">
+        <span class="key-hint">🔑 access requires quantum key:</span>
+        <input class="key-input" id="lcKeyInput" type="text" placeholder="enter key…" autocomplete="off"/>
+        <span id="lc-key-fb"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Doc footer -->
+  <div class="doc-footer">
+    <span>aryasuneesh.github.io &nbsp;·&nbsp; living document &nbsp;·&nbsp; continuously revised</span>
+    <span id="lcFooterStats">computing token count…</span>
+  </div>
+
+</div><!-- /document -->
+</div><!-- /doc-wrap -->
+</div><!-- /lc-wrap -->
+
+{{ partialCached "footer.html" . .Layout .Kind (.Param "hideFooter") (.Param "ShowCodeCopyButtons") }}
+
+<script>
+// ── Interactive dependency parse widget ──────────────────────────────────
+(function lcDepParse() {
+  // Two CDNs tried in order — unpkg first, jsDelivr as fallback
+  const CDNS = [
+    'https://unpkg.com/compromise/builds/compromise.min.js',
+    'https://cdn.jsdelivr.net/npm/compromise/builds/compromise.min.js',
+  ];
+
+  function loadScript(urls, cb) {
+    const src = urls[0];
+    const rest = urls.slice(1);
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = cb;
+    s.onerror = () => {
+      if (rest.length) {
+        loadScript(rest, cb); // try next CDN
+      } else {
+        const el = document.getElementById('lc-dep-svg');
+        if (el) el.innerHTML = '<div class="dep-loading">⚠ Could not load NLP library (both CDNs failed)</div>';
+      }
+    };
+    document.head.appendChild(s);
+  }
+
+  // Map compromise tag array to Universal POS label
+  function mapPos(tags) {
+    if (tags.includes('Pronoun'))    return 'PRON';
+    if (tags.includes('ProperNoun')) return 'PROPN';
+    if (tags.includes('Noun'))       return 'NOUN';
+    if (tags.includes('Auxiliary') || tags.includes('Modal')) return 'AUX';
+    if (tags.includes('Verb'))       return 'VERB';
+    if (tags.includes('Adjective'))  return 'ADJ';
+    if (tags.includes('Adverb'))     return 'ADV';
+    if (tags.includes('Preposition')) return 'ADP';
+    if (tags.includes('Conjunction') || tags.includes('Subordinator')) return 'SCONJ';
+    if (tags.includes('Determiner') || tags.includes('Article')) return 'DET';
+    if (tags.includes('Value') || tags.includes('Cardinal'))     return 'NUM';
+    return 'X';
+  }
+
+  // Rule-based arc parser → assigns head index + dep label to each token
+  function buildDeps(toks) {
+    const n = toks.length;
+    const H = Array(n).fill(-1);    // head index
+    const D = Array(n).fill('dep'); // dep label
+
+    // Attach leftward DET / ADJ / compound-NOUN modifiers to noun at nounIdx
+    function attachMods(nounIdx, lb) {
+      for (let k = nounIdx - 1; k >= lb; k--) {
+        if (H[k] !== -1) break;
+        if      (toks[k].pos === 'DET')  { H[k] = nounIdx; D[k] = 'det';      }
+        else if (toks[k].pos === 'ADJ')  { H[k] = nounIdx; D[k] = 'amod';     }
+        else if (toks[k].pos === 'NOUN') { H[k] = nounIdx; D[k] = 'compound'; }
+        else break;
+      }
+    }
+
+    // Consume a PP: prep at prepIdx governs govIdx; returns last consumed index
+    function consumePP(prepIdx, govIdx) {
+      H[prepIdx] = govIdx; D[prepIdx] = 'prep';
+      for (let j = prepIdx + 1; j < n; j++) {
+        if (H[j] !== -1) continue;
+        if (['NOUN','PROPN','PRON'].includes(toks[j].pos)) {
+          H[j] = prepIdx; D[j] = 'pobj';
+          attachMods(j, prepIdx + 1);
+          return j;
+        }
+        if (toks[j].pos === 'ADP') return prepIdx; // nested prep — stop
+      }
+      return prepIdx;
+    }
+
+    // 1. Root = leftmost finite verb (VERB or AUX)
+    let root = toks.findIndex(t => t.pos === 'VERB' || t.pos === 'AUX');
+    if (root === -1) root = 0;
+    H[root] = root; D[root] = 'ROOT';
+
+    // 2. nsubj = nearest NOUN/PRON/PROPN to the left of root
+    for (let i = root - 1; i >= 0; i--) {
+      if (['NOUN','PROPN','PRON'].includes(toks[i].pos)) {
+        H[i] = root; D[i] = 'nsubj';
+        attachMods(i, 0);
+        break;
+      }
+    }
+
+    // 3. Relative clause: scan for that / which / who / whom / whose
+    const REL = new Set(['that','which','who','whom','whose']);
+    let dobjIdx = -1;
+    for (let i = root + 1; i < n; i++) {
+      if (REL.has(toks[i].text.toLowerCase())) {
+        // Nearest unattached noun left of the rel-pron = dobj of root
+        for (let k = i - 1; k > root; k--) {
+          if (['NOUN','PROPN'].includes(toks[k].pos) && H[k] === -1) {
+            dobjIdx = k; H[k] = root; D[k] = 'dobj';
+            attachMods(k, root + 1);
+            break;
+          }
+        }
+        // Relative clause verb
+        let relV = -1;
+        for (let k = i + 1; k < n; k++) {
+          if ((toks[k].pos === 'VERB' || toks[k].pos === 'AUX') && H[k] === -1) {
+            relV = k; break;
+          }
+        }
+        if (relV > -1) {
+          const anchor = dobjIdx > -1 ? dobjIdx : root;
+          H[relV] = anchor; D[relV] = 'relcl';
+          H[i]    = relV;   D[i]    = 'nsubj';
+          // Process inside rel-clause: PP, then any remaining nouns
+          for (let k = relV + 1; k < n; k++) {
+            if (H[k] !== -1) continue;
+            if (toks[k].pos === 'ADP') { consumePP(k, relV); break; }
+            if (['NOUN','PROPN'].includes(toks[k].pos)) {
+              H[k] = relV; D[k] = 'dobj';
+              attachMods(k, relV + 1);
+            }
+          }
+        }
+        break; // only first relative clause
+      }
+    }
+
+    // 4. Direct object (if no relcl found it yet)
+    if (dobjIdx === -1) {
+      for (let i = root + 1; i < n; i++) {
+        if (H[i] !== -1) continue;
+        if (['NOUN','PROPN'].includes(toks[i].pos)) {
+          dobjIdx = i; H[i] = root; D[i] = 'dobj';
+          attachMods(i, root + 1);
+          break;
+        }
+        if (toks[i].pos === 'ADP') break;
+      }
+    }
+
+    // 5. Root-level prepositional phrases
+    for (let i = root + 1; i < n; i++) {
+      if (H[i] === -1 && toks[i].pos === 'ADP') consumePP(i, root);
+    }
+
+    // 6. Adverbials
+    for (let i = 0; i < n; i++) {
+      if (H[i] === -1 && toks[i].pos === 'ADV') { H[i] = root; D[i] = 'advmod'; }
+    }
+
+    // 7. Fallback: remaining unattached → root
+    for (let i = 0; i < n; i++) {
+      if (H[i] === -1) { H[i] = root; D[i] = 'dep'; }
+    }
+
+    return toks.map((t, i) => ({ ...t, head: H[i], dep: D[i] }));
+  }
+
+  // Build SVG from parsed token array
+  function renderSvg(parsed) {
+    const ns    = 'http://www.w3.org/2000/svg';
+    const n     = parsed.length;
+    const wordY = 128;        // word text baseline
+    const posY  = wordY + 18; // POS tag baseline
+    const boxH  = 22;
+    const gap   = 14;
+    const startX= 18;
+    const charW = 8.0;        // px per char estimate
+    const boxPad= 22;
+
+    // Compute per-token layout
+    const pos = [];
+    let x = startX;
+    parsed.forEach(t => {
+      const w = Math.max(t.text.length * charW + boxPad, 38);
+      pos.push({ cx: x + w / 2, w });
+      x += w + gap;
+    });
+
+    const svgW = x - gap + startX;
+    const svgH = wordY + 48;
+
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+    // Arrowhead markers — use unique ID prefix per render to avoid collisions
+    const uid  = 'lda' + Math.random().toString(36).slice(2, 6);
+    const defs = document.createElementNS(ns, 'defs');
+    [['b', 'rgba(135,206,235,.85)'], ['p', 'rgba(190,140,255,.85)']].forEach(([suffix, fill]) => {
+      const m = document.createElementNS(ns, 'marker');
+      m.setAttribute('id',          `${uid}-${suffix}`);
+      m.setAttribute('markerWidth', '7');
+      m.setAttribute('markerHeight','7');
+      m.setAttribute('refX',        '3.5');
+      m.setAttribute('refY',        '3.5');
+      m.setAttribute('orient',      'auto');
+      const p = document.createElementNS(ns, 'path');
+      p.setAttribute('d', 'M0,0 L7,3.5 L0,7 Z');
+      p.setAttribute('fill', fill);
+      m.appendChild(p);
+      defs.appendChild(m);
+    });
+    svg.appendChild(defs);
+
+    const DEP_COLORS = {
+      nsubj: 'rgba(135,206,235,.85)', dobj:   'rgba(135,206,235,.85)',
+      relcl: 'rgba(190,140,255,.85)', prep:   'rgba(135,206,235,.85)',
+      pobj:  'rgba(135,206,235,.85)', amod:   'rgba(135,206,235,.75)',
+      compound:'rgba(135,206,235,.65)',det:   'rgba(135,206,235,.55)',
+      advmod:'rgba(135,206,235,.7)',  dep:    'rgba(160,160,200,.5)',
+    };
+    const LBL_COLORS = {
+      relcl: 'rgba(160,100,220,.8)',
+    };
+
+    // Draw arcs (behind word boxes)
+    parsed.forEach((t, i) => {
+      if (t.dep === 'ROOT') return;
+      const j = t.head;
+      if (j < 0 || j >= n) return;
+      const isPurple = t.dep === 'relcl';
+      const stroke   = DEP_COLORS[t.dep]  || 'rgba(135,206,235,.7)';
+      const lblFill  = LBL_COLORS[t.dep]  || 'rgba(100,100,185,.75)';
+      const marker   = isPurple ? `${uid}-p` : `${uid}-b`;
+
+      const x1   = pos[i].cx;
+      const x2   = pos[j].cx;
+      const dist = Math.abs(i - j);
+      const yBase= wordY - boxH;                       // top of word box
+      const arcH = Math.min(18 + dist * 22, yBase - 12);
+      const yc   = yBase - arcH;
+      const mx   = (x1 + x2) / 2;
+
+      const path = document.createElementNS(ns, 'path');
+      path.setAttribute('d',            `M${x1},${yBase} Q${mx},${yc} ${x2},${yBase}`);
+      path.setAttribute('fill',         'none');
+      path.setAttribute('stroke',       stroke);
+      path.setAttribute('stroke-width', '1.5');
+      path.setAttribute('marker-end',   `url(#${marker})`);
+      svg.appendChild(path);
+
+      const lbl = document.createElementNS(ns, 'text');
+      lbl.setAttribute('x',            mx);
+      lbl.setAttribute('y',            yc - 3);
+      lbl.setAttribute('text-anchor',  'middle');
+      lbl.setAttribute('font-size',    '8.5');
+      lbl.setAttribute('font-family',  'PT Mono, monospace');
+      lbl.setAttribute('fill',         lblFill);
+      lbl.textContent = t.dep;
+      svg.appendChild(lbl);
+    });
+
+    // Draw word boxes + text (on top of arcs)
+    parsed.forEach((t, i) => {
+      const { cx, w } = pos[i];
+      const bx = cx - w / 2;
+      const by = wordY - boxH;
+
+      const rect = document.createElementNS(ns, 'rect');
+      rect.setAttribute('x', bx); rect.setAttribute('y', by);
+      rect.setAttribute('width', w); rect.setAttribute('height', boxH);
+      rect.setAttribute('rx',           '3');
+      rect.setAttribute('fill',         'rgba(248,246,255,.92)');
+      rect.setAttribute('stroke',       'rgba(135,206,235,.4)');
+      rect.setAttribute('stroke-width', '1');
+      svg.appendChild(rect);
+
+      const wt = document.createElementNS(ns, 'text');
+      wt.setAttribute('x',           cx);
+      wt.setAttribute('y',           wordY - 5);
+      wt.setAttribute('text-anchor', 'middle');
+      wt.setAttribute('font-size',   '13');
+      wt.setAttribute('font-family', 'Lexend Deca, sans-serif');
+      wt.setAttribute('fill',        '#1a1a2e');
+      wt.textContent = t.text;
+      svg.appendChild(wt);
+
+      const pt = document.createElementNS(ns, 'text');
+      pt.setAttribute('x',           cx);
+      pt.setAttribute('y',           posY);
+      pt.setAttribute('text-anchor', 'middle');
+      pt.setAttribute('font-size',   '7.5');
+      pt.setAttribute('font-family', 'PT Mono, monospace');
+      pt.setAttribute('fill',        'rgba(100,100,185,.55)');
+      pt.textContent = t.pos;
+      svg.appendChild(pt);
+    });
+
+    return svg;
+  }
+
+  function render(text) {
+    const container = document.getElementById('lc-dep-svg');
+    if (!container || !text.trim()) return;
+    if (!window.nlp) {
+      container.innerHTML = '<div class="dep-loading">loading…</div>';
+      return;
+    }
+    const json = window.nlp(text).json();
+    if (!json.length || !json[0].terms.length) return;
+
+    const rawToks = json[0].terms
+      .filter(t => t.text.trim() && !t.tags.includes('Punctuation'))
+      .slice(0, 12)
+      .map(t => ({ text: t.text, pos: mapPos(t.tags) }));
+
+    if (!rawToks.length) return;
+
+    const parsed = buildDeps(rawToks);
+    const svg    = renderSvg(parsed);
+    container.innerHTML = '';
+    container.appendChild(svg);
+  }
+
+  function init() {
+    const input = document.getElementById('lc-dep-input');
+    const btn   = document.getElementById('lc-dep-btn');
+    if (!input || !btn) return;
+    btn.addEventListener('click',    () => render(input.value.trim()));
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') render(input.value.trim()); });
+    render(input.value.trim());
+  }
+
+  loadScript(CDNS, init);
+})();
+
+// ── Attention heatmap ────────────────────────────────────────────────────
+(function lcBuildAttnHeatmap() {
+  const tokens = ['attention','maps','meaning','across','token','boundaries'];
+  // row = query, col = key
+  // Computed via softmax over linguistically-structured logits:
+  //   attention→maps (subj-verb), maps↔meaning (verb-obj),
+  //   across→token (prep→NP), token↔boundaries (compound modifier→head)
+  // Verified: all row sums = 1.00
+  const W = [
+    [0.59, 0.27, 0.07, 0.03, 0.02, 0.02],  // attention
+    [0.27, 0.48, 0.15, 0.05, 0.03, 0.02],  // maps
+    [0.04, 0.16, 0.64, 0.04, 0.05, 0.07],  // meaning
+    [0.04, 0.12, 0.04, 0.33, 0.40, 0.07],  // across
+    [0.02, 0.03, 0.04, 0.14, 0.31, 0.46],  // token
+    [0.02, 0.03, 0.08, 0.06, 0.34, 0.47],  // boundaries
+  ];
+  const n = tokens.length;
+  const cell = 46, labelW = 76, labelH = 52, pad = 8;
+  const svgW = labelW + n * cell + pad;
+  const svgH = labelH + n * cell + pad;
+  const ns = 'http://www.w3.org/2000/svg';
+
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
+  svg.setAttribute('width', '100%');
+  svg.style.maxWidth = '520px';
+  svg.style.display = 'block';
+  svg.style.margin = '0 auto';
+
+  // column labels (rotated)
+  tokens.forEach((tok, j) => {
+    const t = document.createElementNS(ns, 'text');
+    t.setAttribute('x', labelW + j * cell + cell / 2);
+    t.setAttribute('y', labelH - 4);
+    t.setAttribute('text-anchor', 'start');
+    t.setAttribute('font-size', '9');
+    t.setAttribute('font-family', 'PT Mono, monospace');
+    t.setAttribute('fill', 'rgba(60,60,140,.65)');
+    t.setAttribute('transform',
+      `rotate(-42, ${labelW + j * cell + cell / 2}, ${labelH - 4})`);
+    t.textContent = tok;
+    svg.appendChild(t);
+  });
+
+  // row labels + cells
+  tokens.forEach((tok, i) => {
+    // row label
+    const lbl = document.createElementNS(ns, 'text');
+    lbl.setAttribute('x', labelW - 6);
+    lbl.setAttribute('y', labelH + i * cell + cell / 2 + 4);
+    lbl.setAttribute('text-anchor', 'end');
+    lbl.setAttribute('font-size', '9');
+    lbl.setAttribute('font-family', 'PT Mono, monospace');
+    lbl.setAttribute('fill', 'rgba(60,60,140,.65)');
+    lbl.textContent = tok;
+    svg.appendChild(lbl);
+
+    W[i].forEach((w, j) => {
+      const rect = document.createElementNS(ns, 'rect');
+      rect.setAttribute('x', labelW + j * cell + 1);
+      rect.setAttribute('y', labelH + i * cell + 1);
+      rect.setAttribute('width', cell - 2);
+      rect.setAttribute('height', cell - 2);
+      rect.setAttribute('rx', '3');
+      // diagonal = blue, off-diagonal = same hue but dimmer
+      const alpha = i === j ? Math.min(w * 1.6, 0.88) : w * 2.2;
+      rect.setAttribute('fill', i === j
+        ? `rgba(135,206,235,${alpha.toFixed(2)})`
+        : `rgba(100,160,220,${alpha.toFixed(2)})`);
+      svg.appendChild(rect);
+
+      // weight label inside cell if large enough
+      if (w >= 0.12) {
+        const wt = document.createElementNS(ns, 'text');
+        wt.setAttribute('x', labelW + j * cell + cell / 2);
+        wt.setAttribute('y', labelH + i * cell + cell / 2 + 4);
+        wt.setAttribute('text-anchor', 'middle');
+        wt.setAttribute('font-size', '8');
+        wt.setAttribute('font-family', 'PT Mono, monospace');
+        wt.setAttribute('fill', alpha > 0.5 ? 'rgba(255,255,255,.85)' : 'rgba(40,80,140,.75)');
+        wt.textContent = w.toFixed(2);
+        svg.appendChild(wt);
+      }
+    });
+  });
+
+  const container = document.getElementById('lcAttnHeatmap');
+  if (container) container.appendChild(svg);
+})();
+
+// ── VQE parameter landscape (barren plateau) ─────────────────────────────
+// Renders on demand when §5 is unlocked (landscape div exists but is hidden).
+// Called after the classified section unlocks.
+function lcRenderVqeLandscape() {
+  const el = document.getElementById('lcVqeLandscape');
+  if (!el || el.dataset.rendered) return;
+  el.dataset.rendered = '1';
+
+  const N = 24;                     // grid resolution
+  const cell = 18;                  // cell size px
+  const labW = 42, labH = 32;       // axis label space
+  const W = N * cell + labW;
+  const H = N * cell + labH + 18;   // +18 for colorbar
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('width', '100%');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+  // Energy function: simulates barren plateau
+  // |cos(θ₁/2)|^6 · |cos(θ₂/2)|^6 gives very flat landscape except near (0,0)
+  function energy(t1, t2) {
+    const c1 = Math.pow(Math.abs(Math.cos(t1 / 2)), 6);
+    const c2 = Math.pow(Math.abs(Math.cos(t2 / 2)), 6);
+    // Add shot-noise smearing: small random variance proportional to 1-E
+    return -(c1 * c2);
+  }
+
+  // Pre-compute range for color normalization
+  let eMin = 0, eMax = -1;  // energy(0,0) = -1, energy(π,π) ≈ 0
+
+  for (let i = 0; i < N; i++) {
+    for (let j = 0; j < N; j++) {
+      const t1 = (i / (N - 1)) * 2 * Math.PI;
+      const t2 = (j / (N - 1)) * 2 * Math.PI;
+      const e  = energy(t1, t2);
+      if (e < eMin) eMin = e;
+      if (e > eMax) eMax = e;
+    }
+  }
+
+  // Color map: deep purple-blue (low E) → washed-out lilac (high E / plateau)
+  function colorForE(e) {
+    const t = (e - eMin) / (eMax - eMin + 1e-9);   // 0 = minimum, 1 = plateau
+    // low E (t≈0): rgba(100,60,220,.95)  deep indigo
+    // high E (t≈1): rgba(200,185,255,.18) pale lilac (flat plateau)
+    const r = Math.round(100 + t * 100);
+    const g = Math.round(60  + t * 125);
+    const b = Math.round(220 + t * 35);
+    const a = (0.95 - t * 0.77).toFixed(2);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+
+  // Grid cells
+  for (let i = 0; i < N; i++) {
+    for (let j = 0; j < N; j++) {
+      const t1 = (i / (N - 1)) * 2 * Math.PI;
+      const t2 = (j / (N - 1)) * 2 * Math.PI;
+      const e  = energy(t1, t2);
+      const rect = document.createElementNS(ns, 'rect');
+      rect.setAttribute('x', labW + j * cell);
+      rect.setAttribute('y', labH + i * cell);
+      rect.setAttribute('width', cell);
+      rect.setAttribute('height', cell);
+      rect.setAttribute('fill', colorForE(e));
+      svg.appendChild(rect);
+    }
+  }
+
+  // Gradient minimum marker at i=0,j=0 (θ₁=θ₂=0)
+  const star = document.createElementNS(ns, 'circle');
+  star.setAttribute('cx', labW + 0 * cell + cell / 2);
+  star.setAttribute('cy', labH + 0 * cell + cell / 2);
+  star.setAttribute('r', '5');
+  star.setAttribute('fill', 'none');
+  star.setAttribute('stroke', 'rgba(255,230,80,.9)');
+  star.setAttribute('stroke-width', '1.5');
+  svg.appendChild(star);
+  const minLbl = document.createElementNS(ns, 'text');
+  minLbl.setAttribute('x', labW + cell / 2 + 8);
+  minLbl.setAttribute('y', labH + cell / 2 + 4);
+  minLbl.setAttribute('font-size', '7.5');
+  minLbl.setAttribute('font-family', 'PT Mono, monospace');
+  minLbl.setAttribute('fill', 'rgba(255,220,60,.85)');
+  minLbl.textContent = '← ⟨E⟩ min';
+  svg.appendChild(minLbl);
+
+  // "BARREN PLATEAU" annotation in the flat region
+  const bp = document.createElementNS(ns, 'text');
+  bp.setAttribute('x', labW + N * cell / 2 + 30);
+  bp.setAttribute('y', labH + N * cell / 2);
+  bp.setAttribute('font-size', '9');
+  bp.setAttribute('font-family', 'PT Mono, monospace');
+  bp.setAttribute('fill', 'rgba(200,185,255,.45)');
+  bp.setAttribute('text-anchor', 'middle');
+  bp.textContent = 'barren plateau';
+  svg.appendChild(bp);
+  const bpArrow = document.createElementNS(ns, 'text');
+  bpArrow.setAttribute('x', labW + N * cell / 2 + 30);
+  bpArrow.setAttribute('y', labH + N * cell / 2 + 12);
+  bpArrow.setAttribute('font-size', '8');
+  bpArrow.setAttribute('font-family', 'PT Mono, monospace');
+  bpArrow.setAttribute('fill', 'rgba(200,185,255,.3)');
+  bpArrow.setAttribute('text-anchor', 'middle');
+  bpArrow.textContent = '∇E ≈ 0';
+  svg.appendChild(bpArrow);
+
+  // Axis labels
+  const xLbl = document.createElementNS(ns, 'text');
+  xLbl.setAttribute('x', labW + (N * cell) / 2);
+  xLbl.setAttribute('y', labH + N * cell + 14);
+  xLbl.setAttribute('font-size', '9');
+  xLbl.setAttribute('font-family', 'PT Mono, monospace');
+  xLbl.setAttribute('fill', 'rgba(190,140,255,.5)');
+  xLbl.setAttribute('text-anchor', 'middle');
+  xLbl.textContent = 'θ₂  [0 → 2π]';
+  svg.appendChild(xLbl);
+
+  const yLbl = document.createElementNS(ns, 'text');
+  yLbl.setAttribute('x', 10);
+  yLbl.setAttribute('y', labH + (N * cell) / 2);
+  yLbl.setAttribute('font-size', '9');
+  yLbl.setAttribute('font-family', 'PT Mono, monospace');
+  yLbl.setAttribute('fill', 'rgba(190,140,255,.5)');
+  yLbl.setAttribute('text-anchor', 'middle');
+  yLbl.setAttribute('transform', `rotate(-90, 10, ${labH + (N * cell) / 2})`);
+  yLbl.textContent = 'θ₁  [0 → 2π]';
+  svg.appendChild(yLbl);
+
+  el.appendChild(svg);
+}
+
+// ── Quantum key ──────────────────────────────────────────────────────────
+const LC_KEY = 'superposition';
+const lcKeyInput   = document.getElementById('lcKeyInput');
+const lcClassified = document.getElementById('lcClassified');
+const lcClTitle    = document.getElementById('lc-cl-title');
+const lcClStamp    = document.getElementById('lc-cl-stamp');
+const lcKeyFb      = document.getElementById('lc-key-fb');
+
+if (lcKeyInput) {
+  lcKeyInput.addEventListener('input', () => {
+    const v = lcKeyInput.value.toLowerCase().trim();
+    if (v === LC_KEY) {
+      lcClassified.classList.add('unlocked');
+      lcClTitle.textContent = 'Quantum Computing Experience';
+      lcClStamp.textContent = '✓  ACCESS GRANTED';
+      lcKeyFb.textContent = 'welcome to the lab';
+      lcKeyFb.style.color = '#44aa77';
+      setTimeout(lcRenderVqeLandscape, 200); // render after CSS transition
+    } else if (v.length >= 5) {
+      lcKeyFb.textContent = v.length >= 9 ? '…very warm' : '…warm';
+      lcKeyFb.style.color = '#cc8844';
+    } else if (v.length > 0) {
+      lcKeyFb.textContent = '…cold';
+      lcKeyFb.style.color = '#888';
+    } else {
+      lcKeyFb.textContent = '';
+    }
+  });
+}
+
+// ── BPE token stream (GPT-2 approximation of bio.txt) ────────────────────
+const lcTokens = [
+  {t:'Ar',id:8351},{t:'ya',id:4613},{t:' Su',id:7311},{t:'ne',id:710},{t:'esh',id:5478},
+  {t:' is',id:318},{t:' an',id:281},{t:' NLP',id:28512},{t:' Engineer',id:9703},
+  {t:' at',id:379},{t:' T',id:309},{t:'IF',id:5064},{t:'IN',id:1268},{t:' RM',id:17986},{t:',',id:11},
+  {t:' where',id:810},{t:' she',id:673},{t:' engineers',id:44021},{t:' semantic',id:14880},
+  {t:' caching',id:33241},{t:' layers',id:11685},{t:' for',id:329},{t:' financial',id:3176},
+  {t:' intel',id:27667},{t:'ligence',id:14390},{t:'.',id:13},
+  {t:' She',id:1375},{t:' completed',id:5668},{t:' her',id:607},
+  {t:' under',id:739},{t:'graduate',id:15286},{t:' studies',id:4188},
+  {t:' at',id:379},{t:' II',id:3180},{t:'IT',id:2043},{t:' K',id:509},{t:'ott',id:44312},
+  {t:'ay',id:3703},{t:'am',id:321},{t:' in',id:287},{t:' India',id:5765},{t:'.',id:13},
+  {t:' Her',id:3204},{t:' work',id:670},{t:' spans',id:26163},
+  {t:' quantum',id:13256},{t:'-',id:12},{t:'classical',id:21560},{t:' hybrid',id:17234},
+  {t:' algorithms',id:18186},{t:',',id:11},{t:' RAG',id:43721},{t:',',id:11},
+  {t:' and',id:290},{t:' multimodal',id:41234},{t:' fake',id:20914},
+  {t:' news',id:3324},{t:' detection',id:13481},{t:'.',id:13},
+];
+
+function lcToggleRaw() {
+  const overlay = document.getElementById('lcRawOverlay');
+  const btn     = document.getElementById('lcRawBtn');
+  const label   = document.getElementById('lcModeLabel');
+  overlay.classList.toggle('on');
+  btn.classList.toggle('on');
+  if (overlay.classList.contains('on')) {
+    label.textContent = '⚡ raw mode';
+    // Reset to full bio tokens when opened via the button
+    const head = document.getElementById('lcRawHead');
+    if (head) head.textContent = 'GPT-2 BPE TOKENIZER · VOCAB_SIZE: 50,257 · src: bio.txt';
+    lcRenderTokens(lcTokens);
+  } else {
+    label.textContent = 'surface view';
+  }
+}
+
+function lcRenderTokens(toks) {
+  toks = toks || lcTokens;
+  const stream = document.getElementById('lcTokenStream');
+  const stats  = document.getElementById('lcRawStats');
+  stream.innerHTML = toks.map(tk => `
+    <div class="tok" title="token_id: ${tk.id}">
+      <span class="tok-id">${tk.id}</span>
+      <span class="tok-text">${tk.t.replace(/ /g,'·')}</span>
+    </div>`).join('');
+  const unique = new Set(toks.map(t => t.id)).size;
+  const avgLen = (toks.reduce((a,t) => a + t.t.trim().length, 0) / toks.length).toFixed(2);
+  const totalChars = toks.reduce((a,t) => a + t.t.length, 0);
+  stats.innerHTML = `
+    <span>tokens: ${toks.length}</span>
+    <span>unique: ${unique}</span>
+    <span>avg_token_len: ${avgLen} chars</span>
+    <span>compression: ${totalChars ? (toks.length / totalChars * 100).toFixed(1) : '—'}%</span>`;
+}
+
+document.getElementById('lcFooterStats').textContent =
+  `${lcTokens.length} tokens · ${lcTokens.map(t=>t.t).join('').replace(/·/g,' ').split(/\s+/).length} words`;
+
+// ── GPT-2 BPE approximation (client-side) ────────────────────────────────
+// Common English words → real GPT-2 token IDs (from HF tokenizer)
+const LC_VOCAB = {
+  ' the':262,' a':257,' an':281,' of':286,' to':284,' in':287,' is':318,
+  ' are':389,' was':373,' were':547,' be':307,' been':587,' being':852,
+  ' have':423,' has':468,' had':550,' will':481,' would':561,' can':460,
+  ' could':714,' should':815,' may':743,' might':1244,' must':994,
+  ' do':466,' does':857,' did':750,' and':290,' or':393,' but':475,
+  ' as':355,' if':611,' on':319,' at':379,' by':416,' for':329,
+  ' with':351,' from':422,' about':546,' after':706,' before':878,
+  ' between':1022,' through':832,' during':1141,' under':739,' over':625,
+  ' into':656,' out':503,' up':510,' down':866,' back':736,' also':635,
+  ' not':407,' no':645,' more':517,' most':749,' other':584,' new':649,
+  ' such':884,' even':772,' well':880,' very':845,' just':655,' only':691,
+  ' than':621,' then':868,' so':523,' one':530,' all':477,' some':617,
+  ' I':314,' we':356,' you':345,' he':339,' she':673,' it':340,
+  ' they':484,' this':428,' that':326,' these':777,' those':883,
+  ' her':607,' his':465,' their':511,' my':616,' our':674,
+  ' which':597,' who':508,' what':644,' when':618,' where':810,
+  ' how':703,' work':670,' works':2499,' learning':4673,' language':3303,
+  ' model':2746,' models':4981,' system':1080,' systems':3341,
+  ' data':1366,' research':2267,' paper':3354,' study':2175,
+  ' NLP':28512,' ML':20747,' AI':9552,' GPT':38,' BERT':33,
+  ' semantic':14880,' caching':33241,' quantum':13256,' hybrid':17234,
+  ' algorithms':18186,' neural':17019,' network':3127,' networks':7379,
+  ' attention':3393,' transformer':47505,' embedding':11525,
+  ' she':673,' he':339,' they':484,' her':607,
+  '.':13,',':11,'!':0,'?':30,':':25,';':26,'-':12,'(':7,')':8,
+  '"':1,"'":6,' -':532,'\n':198,
+};
+
+// Suffix/prefix rules for subword splitting
+const LC_SUFFIXES = [
+  'ization','isation','ification','ational','iveness','fulness','ousness',
+  'ation','ement','ness','less','ment','tion','sion','ing','ated',
+  'ates','ers','ied','ies','ful','ous','ive','ble','cal','ism','ist',
+  'ize','ise','ify','al','ly','ed','er','es','en','s',
+];
+const LC_PREFIXES = [
+  'under','super','inter','trans','multi','semi','anti','over',
+  'non','pre','dis','mis','un','re','co','de',
+];
+
+function lcBpeHash(s) {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h) ^ s.charCodeAt(i);
+  return (h >>> 0) % 50257;
+}
+
+function lcBpeSplit(word) {
+  if (word.length <= 3) return [word];
+  for (const suf of LC_SUFFIXES) {
+    if (word.endsWith(suf) && word.length - suf.length >= 3) {
+      const stem = word.slice(0, word.length - suf.length);
+      return [...(stem.length > 7 ? lcBpeSplit(stem) : [stem]), suf];
+    }
+  }
+  for (const pre of LC_PREFIXES) {
+    if (word.startsWith(pre) && word.length - pre.length >= 3) {
+      const rest = word.slice(pre.length);
+      return [pre, ...(rest.length > 7 ? lcBpeSplit(rest) : [rest])];
+    }
+  }
+  if (word.length > 8) {
+    const mid = Math.ceil(word.length / 2);
+    return [word.slice(0, mid), word.slice(mid)];
+  }
+  return [word];
+}
+
+function lcApproxBpe(text) {
+  // GPT-2-style pre-tokenization: contractions, words, numbers, punctuation
+  const pieces = text.match(/'s|'t|'re|'ve|'m|'ll|'d| ?[A-Za-z]+| ?[0-9]+| ?[^\s\w\d]+/g) || [];
+  const out = [];
+  pieces.forEach(piece => {
+    const sp   = piece.startsWith(' ');
+    const word = piece.trim();
+    if (!word) return;
+    const key  = sp ? ' ' + word : word;
+    if (LC_VOCAB[key]  !== undefined) { out.push({ t: key,  id: LC_VOCAB[key]  }); return; }
+    if (LC_VOCAB[word] !== undefined) { out.push({ t: word, id: LC_VOCAB[word] }); return; }
+    // Subword split
+    lcBpeSplit(word).forEach((sub, si) => {
+      const tok = si === 0 && sp ? ' ' + sub : sub;
+      out.push({ t: tok, id: lcBpeHash(tok) });
+    });
+  });
+  return out;
+}
+
+// ── Para bracket injection ────────────────────────────────────────────────
+(function lcInjectBrackets() {
+  document.querySelectorAll('.lc-para').forEach((para, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'tok-bracket';
+    btn.setAttribute('title', 'tokenize paragraph');
+    btn.setAttribute('aria-label', 'tokenize this paragraph');
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      // Extract plain text (excludes button's own content which is empty)
+      const raw = para.innerText.replace(/\n+/g, ' ').trim();
+      const toks = lcApproxBpe(raw);
+
+      // Update overlay header with para source info
+      const head = document.getElementById('lcRawHead');
+      // Snippet: first ~40 chars of paragraph
+      const snip = raw.length > 42 ? raw.slice(0, 40) + '…' : raw;
+      if (head) head.textContent = `GPT-2 BPE (approx) · para ${idx + 1} · "${snip}"`;
+
+      // Render & open
+      lcRenderTokens(toks);
+      const overlay = document.getElementById('lcRawOverlay');
+      const rawBtn  = document.getElementById('lcRawBtn');
+      const label   = document.getElementById('lcModeLabel');
+      overlay.classList.add('on');
+      rawBtn.classList.add('on');
+      label.textContent = '⚡ raw mode';
+    });
+    para.appendChild(btn);
+  });
+})();
+</script>
+
+</body>
+</html>

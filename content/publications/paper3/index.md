@@ -15,7 +15,7 @@ Fake news on social media platforms poses significant threats to public trust an
 
 ##### Paper Link
 <!-- [View Paper on OpenReview](https://openreview.net/forum?id=BDQ6wT3Xrh) -->
-Under Review at the QuantumNLP Workshop at AACL-IJCNLP 2025
+Accepted, Oral Presentation at the QuantumNLP Workshop at AACL-IJCNLP 2025
 
 <!-- ##### Citation
 ```BibTeX

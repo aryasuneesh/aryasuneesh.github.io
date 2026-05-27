@@ -144,6 +144,46 @@
 {{- partial "templates/opengraph.html" . }}
 {{- partial "templates/twitter_cards.html" . }}
 {{- partial "templates/schema_json.html" . }}
+{{- if .IsHome }}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Arya Suneesh",
+  "url": "https://aryasuneesh.github.io/",
+  "image": "https://aryasuneesh.github.io/picture.jpg",
+  "jobTitle": "NLP Engineer",
+  "worksFor": {
+    "@type": "Organization",
+    "name": "TIFIN RM"
+  },
+  "alumniOf": {
+    "@type": "CollegeOrUniversity",
+    "name": "IIIT Kottayam"
+  },
+  "description": "NLP Engineer at TIFIN RM with expertise in multilingual NLP, AI research, and quantum computing. IIIT Kottayam undergraduate with international research experience at MCQST Munich and Berlin University of the Arts.",
+  "email": "aryasuneesh3@gmail.com",
+  "sameAs": [
+    "https://www.linkedin.com/in/arya-suneesh/",
+    "https://github.com/aryasuneesh",
+    "https://scholar.google.com/citations?user=0tq3v-4AAAAJ&hl=en",
+    "https://x.com/arya_suneesh",
+    "https://www.youtube.com/@aryasuneesh/",
+    "https://aryasuneesh.substack.com"
+  ],
+  "knowsAbout": [
+    "Natural Language Processing",
+    "Machine Learning",
+    "Quantum Computing",
+    "Multilingual AI Systems",
+    "Information Retrieval",
+    "Fact-checking Automation",
+    "Semantic Caching",
+    "Variational Quantum Eigensolver"
+  ]
+}
+</script>
+{{- end }}
 
 {{ if and (hugo.IsProduction) (.Site.Params.googleAnalyticsID) }}
 {{- partial "analytics.html" . }}

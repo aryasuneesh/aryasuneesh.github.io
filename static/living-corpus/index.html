@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arya Suneesh — Living Corpus</title>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&family=Caveat:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --paper: #faf9f6;
+      --page-bg: #edeaf7;
+      --ink: #1a1a2e;
+      --ink-light: #4a4a6a;
+      --blue: #87ceeb;
+      --lilac: #c8b4ff;
+      --ner-person-bg: #ffe8e8; --ner-person-border: #ffaaaa;
+      --ner-org-bg: #ddf0ff;   --ner-org-border: #87ceeb;
+      --ner-loc-bg: #e0f5e6;   --ner-loc-border: #77cc88;
+      --ner-tech-bg: #f0e8ff;  --ner-tech-border: #bb88ff;
+      --hl-yellow: rgba(255,235,80,0.55);
+      --hl-blue: rgba(135,206,235,0.38);
+      --hl-pink: rgba(255,170,170,0.38);
+      --margin-ink: #5555aa;
+      --font: 'Crimson Text', Georgia, serif;
+      --font-hand: 'Caveat', cursive;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    body {
+      background: var(--page-bg);
+      background-image:
+        radial-gradient(ellipse at 20% 60%, rgba(200,180,255,.15) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 15%, rgba(135,206,235,.14) 0%, transparent 45%);
+      min-height: 100vh;
+      font-family: var(--font);
+      color: var(--ink);
+      padding: 48px 20px 80px;
+    }
+
+    /* ── Controls ─────────────────────────────── */
+    .controls {
+      position: fixed; top: 20px; right: 20px;
+      z-index: 1000;
+      display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+    }
+    .raw-btn {
+      background: var(--ink); color: #d8d8ff;
+      border: none; padding: 8px 16px;
+      font-family: var(--font-mono); font-size: 11px; letter-spacing: .8px;
+      cursor: pointer; border-radius: 4px; transition: all .2s;
+    }
+    .raw-btn:hover { background: #3d3d7a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(80,60,180,.3); }
+    .raw-btn.on { background: #5533aa; box-shadow: 0 0 16px rgba(130,80,255,.4); }
+    .mode-label { font-family: var(--font-hand); font-size: 13px; color: var(--margin-ink); opacity: .7; }
+
+    /* ── Document wrapper ─────────────────────── */
+    .doc-wrap { max-width: 860px; margin: 0 auto; position: relative; }
+
+    .document {
+      background: var(--paper);
+      box-shadow: 0 4px 6px rgba(0,0,0,.06), 0 24px 48px rgba(100,80,180,.13), 8px 8px 0 rgba(200,180,255,.25);
+      border-radius: 2px;
+      padding: 64px 88px 88px;
+      position: relative;
+      background-image: repeating-linear-gradient(
+        0deg, transparent, transparent 27px,
+        rgba(135,206,235,.055) 27px, rgba(135,206,235,.055) 28px
+      );
+    }
+    .document::before {
+      content: ''; position: absolute;
+      left: 66px; top: 0; bottom: 0; width: 1px;
+      background: rgba(255,140,140,.3);
+    }
+    .document::after {
+      content: 'DRAFT';
+      position: absolute; top: 46%; left: 50%;
+      transform: translate(-50%,-50%) rotate(-28deg);
+      font-family: var(--font-hand); font-size: 130px; font-weight: 700;
+      color: rgba(135,206,235,.065); pointer-events: none; white-space: nowrap;
+    }
+
+    /* ── Header ───────────────────────────────── */
+    .doc-header {
+      border-bottom: 2px solid rgba(135,206,235,.5);
+      padding-bottom: 36px; margin-bottom: 52px; position: relative;
+    }
+    .draft-stamp {
+      display: inline-block;
+      border: 2px solid rgba(190,80,80,.45); color: rgba(190,80,80,.55);
+      font-family: var(--font-mono); font-size: 10px;
+      padding: 3px 9px; letter-spacing: 2.5px;
+      transform: rotate(-1.5deg); margin-bottom: 18px;
+    }
+    .paper-meta {
+      font-family: var(--font-mono); font-size: 10px; color: var(--ink-light);
+      opacity: .55; margin-bottom: 22px; display: flex; gap: 24px;
+    }
+    .live-dot { display: inline-block; width: 6px; height: 6px; background: #4caf50; border-radius: 50%; margin-right: 6px; animation: blink 2.2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    h1.doc-title { font-size: 44px; font-weight: 600; letter-spacing: -.5px; margin-bottom: 5px; }
+    .doc-subtitle { font-style: italic; font-size: 19px; color: var(--ink-light); margin-bottom: 18px; }
+
+    .affiliations { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 22px; align-items: center; }
+    .affiliations .sep { color: rgba(100,100,140,.4); }
+
+    .social-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+    .social-pill {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--blue); filter: brightness(.8);
+      border: 1px solid rgba(135,206,235,.45);
+      padding: 4px 11px; border-radius: 20px;
+      text-decoration: none; transition: all .18s;
+    }
+    .social-pill:hover { background: rgba(135,206,235,.1); filter: brightness(1); }
+
+    .abstract {
+      background: rgba(135,206,235,.08);
+      border-left: 3px solid rgba(135,206,235,.6);
+      padding: 16px 22px; position: relative;
+    }
+    .abstract-label {
+      font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px;
+      color: var(--ink-light); text-transform: uppercase; margin-bottom: 8px;
+    }
+    .abstract p { font-size: 16px; line-height: 1.75; color: var(--ink-light); }
+
+    /* ── Sections ─────────────────────────────── */
+    .sec { margin-bottom: 56px; position: relative; }
+    .sec-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; }
+    .sec-num { font-family: var(--font-mono); font-size: 11px; color: var(--blue); filter: brightness(.8); font-weight: 500; }
+    .sec-title {
+      font-size: 22px; font-weight: 600;
+      border-bottom: 1px solid rgba(135,206,235,.3);
+      padding-bottom: 4px; flex: 1;
+    }
+
+    /* ── Paragraphs ───────────────────────────── */
+    .para { font-size: 17px; line-height: 1.9; margin-bottom: 20px; position: relative; }
+
+    /* ── NER spans ────────────────────────────── */
+    .ner {
+      display: inline; padding: 1px 5px; border-radius: 3px;
+      cursor: help; position: relative; transition: filter .15s;
+    }
+    .ner:hover { filter: brightness(.93); }
+    .ner::after {
+      content: attr(data-label);
+      position: absolute; top: -22px; left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-mono); font-size: 8px; letter-spacing: .5px;
+      padding: 2px 5px; border-radius: 3px; white-space: nowrap;
+      opacity: 0; transition: opacity .15s; pointer-events: none; font-weight: 600;
+    }
+    .ner:hover::after { opacity: 1; }
+
+    .ner.person { background: var(--ner-person-bg); border-bottom: 1.5px solid var(--ner-person-border); }
+    .ner.person::after { background: var(--ner-person-border); color: #700000; }
+    .ner.org { background: var(--ner-org-bg); border-bottom: 1.5px solid var(--ner-org-border); }
+    .ner.org::after { background: var(--ner-org-border); color: #00335a; }
+    .ner.loc { background: var(--ner-loc-bg); border-bottom: 1.5px solid var(--ner-loc-border); }
+    .ner.loc::after { background: var(--ner-loc-border); color: #003300; }
+    .ner.tech { background: var(--ner-tech-bg); border-bottom: 1.5px solid var(--ner-tech-border); }
+    .ner.tech::after { background: var(--ner-tech-border); color: #300060; }
+
+    /* ── Highlights ───────────────────────────── */
+    .hl-y { background: var(--hl-yellow); border-radius: 2px; }
+    .hl-b { background: var(--hl-blue);   border-radius: 2px; }
+    .hl-p { background: var(--hl-pink);   border-radius: 2px; }
+    .struck { text-decoration: line-through; color: var(--ink-light); opacity: .55; }
+
+    /* ── Margin notes ─────────────────────────── */
+    .mn {
+      position: absolute; font-family: var(--font-hand); font-size: 13px;
+      color: var(--margin-ink); line-height: 1.4; width: 116px;
+      pointer-events: none;
+    }
+    .mn.l { left: -134px; top: 0; text-align: right; }
+    .mn.r { right: -134px; top: 0; }
+    .mn.red { color: rgba(180,50,50,.65); }
+
+    /* ── Dep-arc container ────────────────────── */
+    .dep-wrap {
+      margin: 28px 0;
+      background: rgba(248,246,255,.7);
+      border: 1px dashed rgba(135,206,235,.45);
+      border-radius: 6px; padding: 18px 18px 12px;
+    }
+    .dep-label {
+      font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.5px;
+      color: rgba(135,206,235,.75); margin-bottom: 10px; text-align: center;
+    }
+    .dep-caption {
+      font-size: 12px; font-family: var(--font-mono); color: rgba(100,100,160,.5);
+      text-align: center; margin-top: 8px; letter-spacing: .5px;
+    }
+
+    /* ── Experience cards ─────────────────────── */
+    .card {
+      border: 1px solid rgba(135,206,235,.3); border-radius: 6px;
+      padding: 20px 24px; margin-bottom: 18px; position: relative;
+      background: rgba(248,246,255,.55);
+    }
+    .card-status {
+      position: absolute; top: 14px; right: 16px;
+      font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px;
+      color: rgba(100,100,170,.5);
+    }
+    .card-title { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+    .card-meta { font-family: var(--font-mono); font-size: 10px; color: rgba(100,100,170,.55); margin-bottom: 10px; letter-spacing: .3px; }
+    .card-body { font-size: 15px; line-height: 1.75; color: var(--ink-light); }
+    .card-body ul { margin: 6px 0 0 18px; }
+    .card-body li { margin-bottom: 5px; }
+    .todo-tag {
+      display: inline-block; font-family: var(--font-hand); font-size: 12px;
+      color: #b06000; background: rgba(255,195,80,.18);
+      border: 1px dashed rgba(200,150,0,.4); padding: 1px 7px; border-radius: 3px; margin-left: 8px;
+    }
+
+    /* ── Publications ─────────────────────────── */
+    .pub-list { counter-reset: pub; }
+    .pub-entry {
+      margin-bottom: 14px; padding-left: 28px; position: relative;
+      font-size: 15px; line-height: 1.65;
+    }
+    .pub-entry::before {
+      content: '[' counter(pub) ']'; counter-increment: pub;
+      position: absolute; left: 0; top: 2px;
+      font-family: var(--font-mono); font-size: 10px; color: var(--ink-light);
+    }
+    .pub-authors { color: var(--ink-light); }
+    .pub-title { font-weight: 600; }
+    .pub-venue { font-style: italic; color: var(--blue); filter: brightness(.75); }
+    .pub-award {
+      display: inline-block; font-family: var(--font-mono); font-size: 9px;
+      background: rgba(255,215,80,.2); border: 1px solid rgba(200,165,0,.35);
+      color: #7a5e00; padding: 1px 6px; border-radius: 3px; margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    /* ── Classified section ───────────────────── */
+    .classified {
+      border: 2px solid rgba(200,50,50,.38);
+      border-radius: 4px; padding: 24px; position: relative;
+      background: rgba(255,240,240,.28);
+      transition: border-color .4s, background .4s;
+    }
+    .classified.unlocked {
+      border-color: rgba(60,180,110,.5);
+      background: rgba(240,255,248,.38);
+      animation: unlock-flash .5s ease;
+    }
+    @keyframes unlock-flash { 0%{background:rgba(80,200,140,.25)} 100%{background:rgba(240,255,248,.38)} }
+
+    .cl-banner { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .cl-stamp {
+      display: inline-block;
+      border: 2px solid rgba(170,35,35,.5); color: rgba(170,35,35,.65);
+      font-family: var(--font-mono); font-size: 13px; letter-spacing: 3px;
+      padding: 4px 12px; transform: rotate(-1deg);
+      transition: color .4s, border-color .4s;
+    }
+    .classified.unlocked .cl-stamp { color: rgba(30,130,80,.75); border-color: rgba(30,130,80,.5); }
+    .cl-level { font-family: var(--font-mono); font-size: 9px; color: rgba(170,35,35,.45); letter-spacing: 1px; }
+
+    .redacted-block {
+      display: block; max-width: 100%; overflow: hidden;
+      font-size: 17px; line-height: 1.9; margin-bottom: 6px;
+      color: transparent; background: #1a1818; border-radius: 2px;
+      user-select: none; transition: background .5s, color .5s;
+    }
+    .classified.unlocked .redacted-block { display: none; }
+    .blacked {
+      background: #1a1818; color: transparent;
+      border-radius: 2px; user-select: none;
+      transition: background .5s, color .5s;
+      display: inline; word-break: break-word;
+    }
+    .classified.unlocked .redacted-block { background: transparent; color: var(--ink); }
+    .classified.unlocked .blacked       { background: transparent; color: var(--ink); }
+
+    .quantum-reveal { display: none; }
+    .classified.unlocked .quantum-reveal { display: block; animation: fadein .5s ease; }
+    @keyframes fadein { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+
+    .key-row { margin-top: 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .key-hint { font-family: var(--font-hand); font-size: 14px; color: rgba(170,35,35,.55); }
+    .key-input {
+      font-family: var(--font-mono); font-size: 13px;
+      background: rgba(255,240,240,.5); border: 1px solid rgba(170,35,35,.3);
+      color: var(--ink); padding: 7px 13px; border-radius: 4px; outline: none; width: 190px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .key-input:focus { border-color: rgba(170,35,35,.6); box-shadow: 0 0 0 3px rgba(170,35,35,.1); }
+    #key-fb { font-family: var(--font-mono); font-size: 10px; color: #888; transition: color .3s; }
+
+    /* ── Raw-mode overlay ─────────────────────── */
+    .raw-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(10,8,24,.88);
+      z-index: 900; overflow-y: auto;
+      padding: 56px 40px; justify-content: center; align-items: flex-start;
+    }
+    .raw-overlay.on { display: flex; }
+    .raw-panel {
+      background: #0b0b18; border: 1px solid #3a3a88;
+      border-radius: 8px; padding: 40px; max-width: 780px; width: 100%;
+      box-shadow: 0 0 48px rgba(80,60,220,.2);
+    }
+    .raw-head {
+      font-family: var(--font-mono); font-size: 10px; letter-spacing: 2px;
+      color: #6666aa; margin-bottom: 22px; padding-bottom: 12px;
+      border-bottom: 1px solid #1e1e38;
+    }
+    .raw-section-title { font-family: var(--font-mono); font-size: 14px; color: #9999dd; margin-bottom: 14px; }
+    .token-stream { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 24px; }
+    .tok { display: inline-flex; flex-direction: column; align-items: center; cursor: help; }
+    .tok-id { font-family: var(--font-mono); font-size: 7px; color: rgba(130,130,190,.45); margin-bottom: 1px; }
+    .tok-text { font-family: var(--font-mono); font-size: 13px; padding: 3px 6px; border-radius: 3px; }
+    .tok:nth-child(6n+1) .tok-text { background:rgba(90,110,255,.22); color:#aabbff; }
+    .tok:nth-child(6n+2) .tok-text { background:rgba(255,90,140,.18); color:#ffaac8; }
+    .tok:nth-child(6n+3) .tok-text { background:rgba(80,215,170,.18); color:#88ffd0; }
+    .tok:nth-child(6n+4) .tok-text { background:rgba(255,195,70,.18); color:#ffdda0; }
+    .tok:nth-child(6n+5) .tok-text { background:rgba(195,90,255,.18); color:#ddaaff; }
+    .tok:nth-child(6n+6) .tok-text { background:rgba(90,195,255,.18); color:#aadfff; }
+    .raw-stats {
+      font-family: var(--font-mono); font-size: 10px; color: #55558a;
+      display: flex; gap: 24px; flex-wrap: wrap;
+      padding-top: 14px; border-top: 1px solid #1e1e38; margin-top: 4px;
+    }
+    .raw-close {
+      float: right; background: none; border: 1px solid #3a3a88;
+      color: #7777aa; font-family: var(--font-mono); font-size: 11px;
+      padding: 6px 13px; cursor: pointer; border-radius: 4px; transition: all .2s;
+    }
+    .raw-close:hover { background: rgba(80,60,200,.15); color: #aaaaee; }
+
+    /* ── Footer ───────────────────────────────── */
+    .doc-footer {
+      margin-top: 64px; padding-top: 18px;
+      border-top: 1px solid rgba(135,206,235,.28);
+      font-family: var(--font-mono); font-size: 9px;
+      color: rgba(100,100,150,.45); display: flex; justify-content: space-between;
+    }
+
+    /* ── Legend ───────────────────────────────── */
+    .legend {
+      display: flex; gap: 14px; flex-wrap: wrap;
+      margin-bottom: 28px;
+      font-family: var(--font-mono); font-size: 10px; color: var(--ink-light);
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+    @media (max-width: 700px) {
+      .document { padding: 40px 28px 60px; }
+      .document::before { left: 20px; }
+      .mn { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Controls ───────────────────────────────── -->
+<div class="controls">
+  <button class="raw-btn" id="rawBtn" onclick="toggleRaw()">⚙ RAW MODE</button>
+  <div class="mode-label" id="modeLabel">surface view</div>
+</div>
+
+<!-- ── Raw mode overlay ────────────────────────── -->
+<div class="raw-overlay" id="rawOverlay">
+  <div class="raw-panel">
+    <button class="raw-close" onclick="toggleRaw()">✕ CLOSE</button>
+    <div class="raw-head">GPT-2 BPE TOKENIZER &nbsp;·&nbsp; VOCAB_SIZE: 50,257 &nbsp;·&nbsp; src: bio.txt</div>
+    <div class="raw-section-title">token stream →</div>
+    <div class="token-stream" id="tokenStream"></div>
+    <div class="raw-stats" id="rawStats"></div>
+  </div>
+</div>
+
+<!-- ── Document ────────────────────────────────── -->
+<div class="doc-wrap">
+<div class="document">
+
+  <!-- Header -->
+  <header class="doc-header">
+    <div class="draft-stamp">DRAFT &nbsp;v1.0</div>
+    <div class="paper-meta">
+      <span>arxiv: cs.CL/2025.aryasuneesh-personal</span>
+      <span><span class="live-dot"></span>Under Continuous Revision</span>
+    </div>
+
+    <h1 class="doc-title">Arya Suneesh</h1>
+    <div class="doc-subtitle">NLP Engineer &thinsp;·&thinsp; AI Researcher &thinsp;·&thinsp; Quantum Enthusiast</div>
+
+    <div class="affiliations">
+      <span class="ner org" data-label="ORG">TIFIN RM</span>
+      <span class="sep">·</span>
+      <span class="ner loc" data-label="GPE">Bengaluru, India</span>
+      <span class="sep">·</span>
+      <span class="ner org" data-label="ORG">IIIT Kottayam</span>
+      <span class="sep">·</span>
+      <span class="ner org" data-label="ORG">MCQST</span>
+    </div>
+
+    <div class="social-row">
+      <a class="social-pill" href="https://github.com/aryasuneesh" target="_blank">GitHub</a>
+      <a class="social-pill" href="https://www.linkedin.com/in/arya-suneesh/" target="_blank">LinkedIn</a>
+      <a class="social-pill" href="https://scholar.google.com/citations?user=0tq3v-4AAAAJ&hl=en" target="_blank">Google Scholar</a>
+      <a class="social-pill" href="https://aryasuneesh.substack.com" target="_blank">Substack</a>
+      <a class="social-pill" href="https://www.youtube.com/@aryasuneesh/" target="_blank">YouTube</a>
+      <a class="social-pill" href="/Arya_Suneesh_Resume_Website.pdf" target="_blank">Resume ↗</a>
+    </div>
+
+    <div class="abstract">
+      <div class="abstract-label">Abstract</div>
+      <p>Building systems that read between the lines. Interested in how language encodes meaning, how <span class="hl-b">attention mechanisms</span> mirror human cognition, and what happens at the boundary between classical and <span class="hl-p">quantum computation</span>. One of 16 selected globally for the <span class="ner org" data-label="ORG">MCQST</span> Summer Bachelor Program; DAAD-WISE Scholar; 3rd place at SemEval 2025 &amp; CLEF CheckThat! 2025.</p>
+    </div>
+  </header>
+
+  <!-- NER legend -->
+  <div class="legend">
+    <span style="opacity:.5;font-size:9px;letter-spacing:1px;align-self:center;">ENTITIES →</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--ner-person-bg);border:1px solid var(--ner-person-border)"></span>PERSON</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--ner-org-bg);border:1px solid var(--ner-org-border)"></span>ORG</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--ner-loc-bg);border:1px solid var(--ner-loc-border)"></span>GPE</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--ner-tech-bg);border:1px solid var(--ner-tech-border)"></span>TECH</span>
+    <span style="opacity:.4;margin-left:6px;font-size:9px;align-self:center;">hover any entity to reveal label</span>
+  </div>
+
+  <!-- § 1 Biography -->
+  <section class="sec">
+    <div class="sec-head">
+      <span class="sec-num">§ 1</span>
+      <h2 class="sec-title">Biography</h2>
+    </div>
+
+    <div class="para" style="position:relative;">
+      <span class="mn l red">affil. updated<br>May 2025</span>
+      <span class="ner person" data-label="PERSON">Arya Suneesh</span> is an
+      <span class="hl-y">NLP Engineer</span> at
+      <span class="ner org" data-label="ORG">TIFIN RM</span>, where she engineers
+      <span class="hl-b">semantic caching layers and LLM agents for wealth management intelligence</span>
+      — reducing query latency by 40–70% across 57 financial query types.
+      She completed her B.Tech. (Hons.) in Computer Science at
+      <span class="ner org" data-label="ORG">IIIT Kottayam</span>, graduating with a GPA of
+      <span class="hl-y">9.64/10</span>, and was selected as one of
+      <span class="hl-p">16 participants worldwide</span> for the
+      <span class="ner org" data-label="ORG">MCQST</span> Summer Bachelor Program at the
+      <span class="ner org" data-label="ORG">Walther-Meißner-Institut</span> in
+      <span class="ner loc" data-label="GPE">Munich</span>.
+      <span class="mn r">GPA verified<br>May 2025</span>
+    </div>
+
+    <div class="para" style="position:relative;">
+      Her work spans
+      <span class="ner tech" data-label="TECH">retrieval-augmented generation</span>,
+      <span class="ner tech" data-label="TECH">transformer fine-tuning</span>, and
+      <span class="ner tech" data-label="TECH">quantum-classical hybrid algorithms</span>.
+      Awarded the <span class="hl-y">DAAD-WISE Scholarship</span> — one of 250 Indian students selected — for
+      research at the <span class="ner org" data-label="ORG">Universität der Künste Berlin</span> and the
+      <span class="ner org" data-label="ORG">Einstein Center Digital Future</span>, where she developed
+      <span class="ner tech" data-label="TECH">ASR models</span> for the Reading Primer educational device.
+      She currently serves as Community Lead, ML Industry at
+      <span class="ner org" data-label="ORG">Cohere Labs Open Science Community</span>.
+      <span class="mn r" style="top:24px;">community<br>role added</span>
+    </div>
+
+    <!-- Dependency arc visualization -->
+    <div class="dep-wrap">
+      <div class="dep-label">◈ DEPENDENCY PARSE · spaCy en_core_web_trf</div>
+      <svg id="depSvg" width="100%" height="170" viewBox="0 0 710 170" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <marker id="arr" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
+            <path d="M0,0 L7,3.5 L0,7 Z" fill="rgba(135,206,235,.85)"/>
+          </marker>
+          <marker id="arr-p" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
+            <path d="M0,0 L7,3.5 L0,7 Z" fill="rgba(190,140,255,.85)"/>
+          </marker>
+        </defs>
+
+        <!-- nsubj: She(50)→engineers(145) -->
+        <path d="M 50,112 Q 97,80 145,112" fill="none" stroke="rgba(135,206,235,.8)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="97" y="73" text-anchor="middle" font-size="9" font-family="JetBrains Mono,monospace" fill="rgba(100,100,185,.75)">nsubj</text>
+
+        <!-- dobj: systems(240)→engineers(145) -->
+        <path d="M 240,112 Q 192,80 145,112" fill="none" stroke="rgba(135,206,235,.8)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="192" y="73" text-anchor="middle" font-size="9" font-family="JetBrains Mono,monospace" fill="rgba(100,100,185,.75)">dobj</text>
+
+        <!-- relcl: learn(415)→systems(240) long arc, purple -->
+        <path d="M 415,112 Q 327,36 240,112" fill="none" stroke="rgba(190,140,255,.8)" stroke-width="1.5" marker-end="url(#arr-p)"/>
+        <text x="327" y="29" text-anchor="middle" font-size="9" font-family="JetBrains Mono,monospace" fill="rgba(160,100,220,.8)">relcl</text>
+
+        <!-- nsubj: that(325)→learn(415) -->
+        <path d="M 325,112 Q 370,80 415,112" fill="none" stroke="rgba(135,206,235,.8)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="370" y="73" text-anchor="middle" font-size="9" font-family="JetBrains Mono,monospace" fill="rgba(100,100,185,.75)">nsubj</text>
+
+        <!-- prep: from(495)→learn(415) -->
+        <path d="M 495,112 Q 455,80 415,112" fill="none" stroke="rgba(135,206,235,.8)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="455" y="73" text-anchor="middle" font-size="9" font-family="JetBrains Mono,monospace" fill="rgba(100,100,185,.75)">prep</text>
+
+        <!-- pobj: language(660)→from(495) -->
+        <path d="M 660,112 Q 577,54 495,112" fill="none" stroke="rgba(135,206,235,.8)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="577" y="47" text-anchor="middle" font-size="9" font-family="JetBrains Mono,monospace" fill="rgba(100,100,185,.75)">pobj</text>
+
+        <!-- amod: human(575)→language(660) -->
+        <path d="M 575,112 Q 617,80 660,112" fill="none" stroke="rgba(135,206,235,.8)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="617" y="73" text-anchor="middle" font-size="9" font-family="JetBrains Mono,monospace" fill="rgba(100,100,185,.75)">amod</text>
+
+        <!-- word boxes -->
+        <rect x="20" y="114" width="60" height="20" rx="3" fill="rgba(248,246,255,.92)" stroke="rgba(135,206,235,.4)" stroke-width="1"/>
+        <text x="50" y="128" text-anchor="middle" font-size="13" font-family="Crimson Text,serif" fill="#1a1a2e">She</text>
+        <text x="50" y="148" text-anchor="middle" font-size="8" font-family="JetBrains Mono,monospace" fill="rgba(100,100,185,.55)">PRON</text>
+
+        <rect x="100" y="114" width="90" height="20" rx="3" fill="rgba(248,246,255,.92)" stroke="rgba(135,206,235,.4)" stroke-width="1"/>
+        <text x="145" y="128" text-anchor="middle" font-size="13" font-family="Crimson Text,serif" fill="#1a1a2e">engineers</text>
+        <text x="145" y="148" text-anchor="middle" font-size="8" font-family="JetBrains Mono,monospace" fill="rgba(100,100,185,.55)">VERB</text>
+
+        <rect x="203" y="114" width="74" height="20" rx="3" fill="rgba(248,246,255,.92)" stroke="rgba(135,206,235,.4)" stroke-width="1"/>
+        <text x="240" y="128" text-anchor="middle" font-size="13" font-family="Crimson Text,serif" fill="#1a1a2e">systems</text>
+        <text x="240" y="148" text-anchor="middle" font-size="8" font-family="JetBrains Mono,monospace" fill="rgba(100,100,185,.55)">NOUN</text>
+
+        <rect x="300" y="114" width="50" height="20" rx="3" fill="rgba(248,246,255,.92)" stroke="rgba(135,206,235,.4)" stroke-width="1"/>
+        <text x="325" y="128" text-anchor="middle" font-size="13" font-family="Crimson Text,serif" fill="#1a1a2e">that</text>
+        <text x="325" y="148" text-anchor="middle" font-size="8" font-family="JetBrains Mono,monospace" fill="rgba(100,100,185,.55)">PRON</text>
+
+        <rect x="385" y="114" width="60" height="20" rx="3" fill="rgba(248,246,255,.92)" stroke="rgba(135,206,235,.4)" stroke-width="1"/>
+        <text x="415" y="128" text-anchor="middle" font-size="13" font-family="Crimson Text,serif" fill="#1a1a2e">learn</text>
+        <text x="415" y="148" text-anchor="middle" font-size="8" font-family="JetBrains Mono,monospace" fill="rgba(100,100,185,.55)">VERB</text>
+
+        <rect x="465" y="114" width="60" height="20" rx="3" fill="rgba(248,246,255,.92)" stroke="rgba(135,206,235,.4)" stroke-width="1"/>
+        <text x="495" y="128" text-anchor="middle" font-size="13" font-family="Crimson Text,serif" fill="#1a1a2e">from</text>
+        <text x="495" y="148" text-anchor="middle" font-size="8" font-family="JetBrains Mono,monospace" fill="rgba(100,100,185,.55)">ADP</text>
+
+        <rect x="545" y="114" width="60" height="20" rx="3" fill="rgba(248,246,255,.92)" stroke="rgba(135,206,235,.4)" stroke-width="1"/>
+        <text x="575" y="128" text-anchor="middle" font-size="13" font-family="Crimson Text,serif" fill="#1a1a2e">human</text>
+        <text x="575" y="148" text-anchor="middle" font-size="8" font-family="JetBrains Mono,monospace" fill="rgba(100,100,185,.55)">ADJ</text>
+
+        <rect x="622" y="114" width="76" height="20" rx="3" fill="rgba(248,246,255,.92)" stroke="rgba(135,206,235,.4)" stroke-width="1"/>
+        <text x="660" y="128" text-anchor="middle" font-size="13" font-family="Crimson Text,serif" fill="#1a1a2e">language</text>
+        <text x="660" y="148" text-anchor="middle" font-size="8" font-family="JetBrains Mono,monospace" fill="rgba(100,100,185,.55)">NOUN</text>
+      </svg>
+      <div class="dep-caption">nsubj &nbsp;·&nbsp; dobj &nbsp;·&nbsp; relcl &nbsp;·&nbsp; prep &nbsp;·&nbsp; pobj &nbsp;·&nbsp; amod &nbsp;&nbsp;|&nbsp;&nbsp; purple arc = cross-clause dependency</div>
+    </div>
+  </section>
+
+  <!-- § 2 Experience -->
+  <section class="sec">
+    <div class="sec-head">
+      <span class="sec-num">§ 2</span>
+      <h2 class="sec-title">Experience</h2>
+    </div>
+
+    <div class="card">
+      <span class="card-status">[CURRENT]</span>
+      <div class="card-title">
+        NLP Engineer — <span class="ner org" data-label="ORG">TIFIN RM</span>
+        <span class="ner loc" data-label="GPE"> · Bengaluru</span>
+      </div>
+      <div class="card-meta">May 2025 – Jan 2026</div>
+      <div class="card-body" style="position:relative;">
+        <ul>
+          <li>Engineered a <span class="hl-b">semantic caching layer</span> using <span class="ner tech" data-label="TECH">MPNet embeddings</span>; reduced response latency by <span class="hl-y">40–70%</span> across 57 financial query types in the client diagnostics module.</li>
+          <li>Optimized <span class="ner tech" data-label="TECH">LLM agents</span> for financial advisory workflows via prompt engineering, data filtering, and token budgeting; extended coverage to SIP/STP/SWP categories with fault-tolerant fallback logic.</li>
+          <li>Built anonymization pipelines and evaluation frameworks; resolved critical production bugs in context routing and response generation.</li>
+        </ul>
+        <span class="mn r" style="font-size:12px;">add eval<br>benchmarks</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="card-status">[COMPLETED]</span>
+      <div class="card-title">
+        Student Researcher — <span class="ner org" data-label="ORG">Walther-Meißner-Institut (WMI)</span>
+        <span class="ner loc" data-label="GPE"> · Munich</span>
+      </div>
+      <div class="card-meta">Jul 2025 – Aug 2025 &nbsp;·&nbsp; MCQST Summer Bachelor Program &nbsp;·&nbsp; 1 of 16 worldwide</div>
+      <div class="card-body">
+        <ul>
+          <li>Developed a <span class="hl-b">shot-based simulation framework</span> for realistic quantum measurements with post-selection to preserve gauge symmetry; designed for a <span class="hl-p">17-qubit superconducting chip</span>.</li>
+          <li>Characterized <span class="ner tech" data-label="TECH">VQE</span> optimization landscapes across shot-noise levels; quantified the impact of measurement statistics on convergence behavior.</li>
+          <li>Contributed to experiment design and algorithm architecture within an international team of six researchers.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="card-status">[COMPLETED]</span>
+      <div class="card-title">
+        AI Research Intern — <span class="ner org" data-label="ORG">TIFIN RM</span>
+        <span class="ner loc" data-label="GPE"> · Bengaluru</span>
+      </div>
+      <div class="card-meta">Jan 2025 – Apr 2025</div>
+      <div class="card-body">
+        <ul>
+          <li>Built semantic caching system for the client diagnostic tool (<span class="hl-y">~60% latency reduction</span> across 57 query types).</li>
+          <li>Improved LLM response quality through data-filter rules and structured prompt variants; diagnosed <span class="ner tech" data-label="TECH">jq</span> command inconsistencies causing latency spikes in advisor portfolios with 10,000+ clients.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="card-status">[COMPLETED]</span>
+      <div class="card-title">
+        AI Research Intern — <span class="ner org" data-label="ORG">MyFi by TIFIN</span>
+        <span class="ner loc" data-label="GPE"> · Bengaluru</span>
+      </div>
+      <div class="card-meta">Oct 2024 – Dec 2024</div>
+      <div class="card-body">
+        <ul>
+          <li>Benchmarked <span class="hl-b">conversational models</span> for a mobile financial assistant; evaluated quality-latency tradeoffs for production deployment.</li>
+          <li>Integrated <span class="hl-y">Indian language and colloquial input</span> support into the MyFi stack.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="card-status">[COMPLETED]</span>
+      <div class="card-title">
+        Research Intern (DAAD-WISE Scholar) — <span class="ner org" data-label="ORG">UdK Berlin</span> / <span class="ner org" data-label="ORG">ECDF</span>
+        <span class="ner loc" data-label="GPE"> · Berlin</span>
+      </div>
+      <div class="card-meta">May 2024 – Jul 2024 &nbsp;·&nbsp; DAAD-WISE Scholarship &nbsp;·&nbsp; 1 of 250 selected from India</div>
+      <div class="card-body">
+        <ul>
+          <li>Developed <span class="ner tech" data-label="TECH">speech recognition</span> components for the Reading Primer device under Prof. Daniel D. Hromada in a six-person team.</li>
+          <li>Implemented and evaluated <span class="ner tech" data-label="TECH">ASR models</span> for on-device learning modules; iteratively advanced the Fibel 4 prototype across multiple hardware-software cycles.</li>
+          <li>Adapted personalized NLP models from <span class="ner org" data-label="ORG">udk.ai</span> and validated their integration into the Reading Primer pipeline.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- § 3 Projects -->
+  <section class="sec">
+    <div class="sec-head">
+      <span class="sec-num">§ 3</span>
+      <h2 class="sec-title">Selected Projects</h2>
+    </div>
+
+    <div class="card" style="position:relative;">
+      <span class="card-status">[ACTIVE]</span>
+      <div class="card-title">Reading Primer</div>
+      <div class="card-meta">UdK Berlin / ECDF · DAAD-WISE · 2024</div>
+      <div class="card-body">
+        An <span class="ner tech" data-label="TECH">NLP-powered</span> reading companion that adapts difficulty and surfaces connections across texts —
+        designed for on-device, low-latency learning.
+        <span class="hl-y">Core insight:</span> reading comprehension is a graph traversal problem;
+        every unfamiliar word is an edge to a new subgraph.
+        Built ASR and personalized NLP components; integrated into the <span class="ner org" data-label="ORG">udk.ai</span> pipeline.
+      </div>
+      <span class="mn r" style="top:36px;font-size:12px;">primary<br>project</span>
+    </div>
+
+    <div class="card">
+      <span class="card-status">[PUBLISHED]</span>
+      <div class="card-title">
+        QCNN-MFND — <span class="ner tech" data-label="TECH">Quantum CNN for Multimodal Fake News Detection</span>
+      </div>
+      <div class="card-meta">Honours Thesis · IIIT Kottayam · 2025 &nbsp;·&nbsp; QNLP @ AACL-IJCNLP 2025</div>
+      <div class="card-body">
+        A novel <span class="hl-b">quantum convolutional neural network</span> framework for detecting fake news across
+        text and image modalities in social media. Combines classical multimodal encoders with
+        <span class="ner tech" data-label="TECH">parameterized quantum circuits</span> to exploit quantum entanglement for cross-modal feature fusion.
+        Supervised by <span class="ner person" data-label="PERSON">Dr. Balasubramanian P</span>.
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="card-status">[SEE §5]</span>
+      <div class="card-title">
+        Quantum VQE &nbsp;<span class="ner tech" data-label="TECH">Variational Quantum Eigensolver</span>
+      </div>
+      <div class="card-meta">Walther-Meißner-Institut · MCQST · 2025</div>
+      <div class="card-body">
+        Shot-based simulation and optimization of <span class="ner tech" data-label="TECH">VQE</span> circuits on a
+        17-qubit superconducting processor. Investigation of barren plateau phenomena
+        under realistic shot-noise conditions.
+        <span class="struck">Won't explain further here</span>
+        → full write-up in §5 (access required).
+      </div>
+    </div>
+  </section>
+
+  <!-- § 4 Publications -->
+  <section class="sec">
+    <div class="sec-head">
+      <span class="sec-num">§ 4</span>
+      <h2 class="sec-title">Publications</h2>
+    </div>
+    <div class="pub-list">
+
+      <div class="pub-entry">
+        <span class="pub-authors">Suneesh, A., Balasubramanian P. </span>
+        <span class="pub-title">"QCNN-MFND: A Novel Quantum CNN Framework for Multimodal Fake News Detection in Social Media." </span>
+        <span class="pub-venue">QNLP Workshop, AACL-IJCNLP 2025, Mumbai.</span>
+      </div>
+
+      <div class="pub-entry">
+        <span class="pub-authors">Hazarika, B., Suneesh, A., Devadiga, P., Rajpoot, P.K., Suresh, A.B., Hussain, A.I. </span>
+        <span class="pub-title">"Multilingual Conversational AI for Financial Assistance: Bridging Language Barriers in Indian FinTech." </span>
+        <span class="pub-venue">FinAI Workshop, CIKM 2025, Seoul.</span>
+      </div>
+
+      <div class="pub-entry">
+        <span class="pub-authors">Sharma, M., Suneesh, A., Jain, M., Rajpoot, P.K., Devadiga, P. et al. </span>
+        <span class="pub-title">"TIFIN at CheckThat! 2025: Reasoning-Guided Claim Normalization for Noisy Multilingual Social Media Posts." </span>
+        <span class="pub-venue">CheckThat! Workshop, CLEF 2025, Barcelona.</span>
+        <span class="pub-award">3rd place · Task 2</span>
+      </div>
+
+      <div class="pub-entry">
+        <span class="pub-authors">Gurumurthy, K., Shrivastava, A., Rajpoot, P.K., Devadiga, P., Hazarika, B., Jain, M., Sharma, M., Suneesh, A. et al. </span>
+        <span class="pub-title">"TIFIN at CheckThat! 2025: Cross-Lingual Subjectivity Classification in News through Monolingual, Multilingual, and Zero-Shot Learning." </span>
+        <span class="pub-venue">CheckThat! Workshop, CLEF 2025, Barcelona.</span>
+      </div>
+
+      <div class="pub-entry">
+        <span class="pub-authors">Hazarika, B., Devadiga, P., Rajpoot, P.K., Baliga, A.U., Gurumurthy, K., Jain, M., Sharma, M., Shrivastava, A., Suneesh, A., Suresh, A.B. </span>
+        <span class="pub-title">"TIFIN at CheckThat! 2025: X-VERIFY – Multi-lingual NLI-based Fact Checking with Condensed Evidence." </span>
+        <span class="pub-venue">CheckThat! Workshop, CLEF 2025, Barcelona.</span>
+      </div>
+
+      <div class="pub-entry">
+        <span class="pub-authors">Devadiga, P., Suneesh, A., Rajpoot, P.K., Hazarika, B., Baliga, A.U. </span>
+        <span class="pub-title">"TIFIN India at SemEval-2025: Harnessing Translation to Overcome Multilingual IR Challenges in Fact-Checked Claim Retrieval." </span>
+        <span class="pub-venue">SemEval 2025, ACL 2025, Vienna.</span>
+        <span class="pub-award">3rd place · Task 7</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- § 5 Classified -->
+  <section class="sec">
+    <div class="sec-head">
+      <span class="sec-num">§ 5</span>
+      <h2 class="sec-title" style="color:rgba(170,35,35,.6);" id="cl-title">██████████ ██████████</h2>
+    </div>
+
+    <div class="classified" id="classified">
+      <div class="cl-banner">
+        <span class="cl-stamp" id="cl-stamp">⚠ &nbsp;CLASSIFIED</span>
+        <span class="cl-level">CLEARANCE LEVEL: QUANTUM-1</span>
+      </div>
+
+      <p class="para">
+        <span class="redacted-block">████████████████████████████████████████████████████████████████████</span>
+        <span class="redacted-block">████████████████████████████ ███████████ ██████████████████████████</span>
+        Research conducted at
+        <span class="blacked">Walther-Meißner-Institut, Munich</span>
+        under the
+        <span class="blacked">MCQST Summer Bachelor Program</span>
+        using
+        <span class="blacked">shot-based VQE simulation</span>
+        on a
+        <span class="blacked">17-qubit superconducting processor</span>.
+      </p>
+
+      <!-- Revealed on unlock -->
+      <div class="quantum-reveal">
+        <div class="para">
+          Research conducted at <span class="ner org" data-label="ORG">Walther-Meißner-Institut (WMI)</span> in
+          <span class="ner loc" data-label="GPE">Munich</span> under the
+          <span class="ner org" data-label="ORG">MCQST</span> Summer Bachelor Program (1 of 16 selected worldwide).
+          Developed a <span class="ner tech" data-label="TECH">shot-based simulation framework</span> for
+          realistic quantum measurements with post-selection to preserve gauge symmetry,
+          designed for deployment on a <span class="hl-p">17-qubit superconducting chip</span>.
+        </div>
+        <div class="para" style="position:relative;">
+          Key finding: <span class="hl-b">VQE optimization landscapes exhibit the barren plateau phenomenon</span>
+          even under finite shot-noise — vanishing gradients that emerge in high-dimensional Hilbert spaces
+          are compounded by measurement statistics in ways the noiseless theory obscures.
+          The boundary between classical and quantum ML is more porous than either field admits.
+          <span class="mn r" style="font-size:12px;">key finding —<br>write-up pending</span>
+        </div>
+        <div class="para">
+          Characterized convergence behavior across varying shot-noise levels in collaboration with an
+          international team of six researchers. Contributed to experiment design and algorithm
+          architecture for the <span class="ner org" data-label="ORG">WMI</span> 17-qubit processor.
+        </div>
+      </div>
+
+      <div class="key-row">
+        <span class="key-hint">🔑 access requires quantum key:</span>
+        <input class="key-input" id="keyInput" type="text" placeholder="enter key…" autocomplete="off"/>
+        <span id="key-fb"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div class="doc-footer">
+    <span>aryasuneesh.github.io &nbsp;·&nbsp; living document &nbsp;·&nbsp; continuously revised</span>
+    <span id="footerStats">computing token count…</span>
+  </div>
+
+</div><!-- /document -->
+</div><!-- /doc-wrap -->
+
+<script>
+// ── Quantum key ────────────────────────────────────────────────────────────
+const KEY = 'superposition';
+const keyInput   = document.getElementById('keyInput');
+const classified = document.getElementById('classified');
+const clTitle    = document.getElementById('cl-title');
+const clStamp    = document.getElementById('cl-stamp');
+const keyFb      = document.getElementById('key-fb');
+
+keyInput.addEventListener('input', () => {
+  const v = keyInput.value.toLowerCase().trim();
+  if (v === KEY) {
+    classified.classList.add('unlocked');
+    clTitle.textContent = 'Quantum Computing Experience';
+    clStamp.textContent = '✓  ACCESS GRANTED';
+    keyFb.textContent = 'welcome to the lab';
+    keyFb.style.color = '#44aa77';
+  } else if (v.length >= 5) {
+    keyFb.textContent = v.length >= 9 ? '…very warm' : '…warm';
+    keyFb.style.color = '#cc8844';
+  } else if (v.length > 0) {
+    keyFb.textContent = '…cold';
+    keyFb.style.color = '#888';
+  } else {
+    keyFb.textContent = '';
+  }
+});
+
+// ── BPE tokens (GPT-2 approximation of bio.txt) ───────────────────────────
+const tokens = [
+  {t:'Ar',id:8351},{t:'ya',id:4613},{t:' Su',id:7311},{t:'ne',id:710},{t:'esh',id:5478},
+  {t:' is',id:318},{t:' an',id:281},{t:' NLP',id:28512},{t:' Engineer',id:9703},
+  {t:' at',id:379},{t:' T',id:309},{t:'IF',id:5064},{t:'IN',id:1268},{t:' RM',id:17986},{t:',',id:11},
+  {t:' where',id:810},{t:' she',id:673},{t:' engineers',id:44021},{t:' semantic',id:14880},
+  {t:' caching',id:33241},{t:' layers',id:11685},{t:' for',id:329},{t:' financial',id:3176},
+  {t:' intel',id:27667},{t:'ligence',id:14390},{t:'.',id:13},
+  {t:' She',id:1375},{t:' completed',id:5668},{t:' her',id:607},
+  {t:' under',id:739},{t:'graduate',id:15286},{t:' studies',id:4188},
+  {t:' at',id:379},{t:' II',id:3180},{t:'IT',id:2043},{t:' K',id:509},{t:'ott',id:44312},
+  {t:'ay',id:3703},{t:'am',id:321},{t:' in',id:287},{t:' India',id:5765},{t:'.',id:13},
+  {t:' Her',id:3204},{t:' work',id:670},{t:' spans',id:26163},
+  {t:' quantum',id:13256},{t:'-',id:12},{t:'classical',id:21560},{t:' hybrid',id:17234},
+  {t:' algorithms',id:18186},{t:',',id:11},{t:' RAG',id:43721},{t:',',id:11},
+  {t:' and',id:290},{t:' multimodal',id:41234},{t:' fake',id:20914},
+  {t:' news',id:3324},{t:' detection',id:13481},{t:'.',id:13},
+];
+
+function toggleRaw() {
+  const overlay = document.getElementById('rawOverlay');
+  const btn     = document.getElementById('rawBtn');
+  const label   = document.getElementById('modeLabel');
+  overlay.classList.toggle('on');
+  btn.classList.toggle('on');
+  if (overlay.classList.contains('on')) {
+    label.textContent = '⚡ raw mode';
+    renderTokens();
+  } else {
+    label.textContent = 'surface view';
+  }
+}
+
+function renderTokens() {
+  const stream = document.getElementById('tokenStream');
+  const stats  = document.getElementById('rawStats');
+  stream.innerHTML = tokens.map(tk => `
+    <div class="tok" title="token_id: ${tk.id}">
+      <span class="tok-id">${tk.id}</span>
+      <span class="tok-text">${tk.t.replace(/ /g,'·')}</span>
+    </div>`).join('');
+  const unique = new Set(tokens.map(t => t.id)).size;
+  const avgLen = (tokens.reduce((a,t) => a + t.t.trim().length, 0) / tokens.length).toFixed(2);
+  stats.innerHTML = `
+    <span>tokens: ${tokens.length}</span>
+    <span>unique: ${unique}</span>
+    <span>avg_token_len: ${avgLen} chars</span>
+    <span>compression: ${(tokens.length / tokens.reduce((a,t)=>a+t.t.length,0) * 100).toFixed(1)}%</span>`;
+}
+
+// Footer stats
+document.getElementById('footerStats').textContent =
+  `${tokens.length} tokens · ${tokens.map(t=>t.t).join('').replace(/·/g,' ').split(/\s+/).length} words`;
+</script>
+</body>
+</html>

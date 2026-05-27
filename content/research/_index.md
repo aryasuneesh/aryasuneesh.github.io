@@ -7,23 +7,17 @@ description: "Research work and academic contributions by Arya Suneesh in quantu
 
 My research interests lie at the intersection of artificial intelligence, quantum computing, and their practical applications. I'm particularly passionate about:
 
-- **Quantum Computing Applications:** quantum NLP, variational quantum algorithms, quantum simulation of physical systems, quantum-inspired optimization for machine learning systems
-- **Natural Language Processing:** Multilingual systems, semantic understanding, production NLP optimization  
+- **Natural Language Processing:** Multilingual systems, semantic understanding, production NLP optimization
 - **AI in Education:** Human-machine interaction, adaptive educational systems
+- **Quantum Computing Applications:** quantum NLP, quantum-inspired optimization
 
 ## Research Philosophy
 
-I believe in research that bridges theory and practice, combining rigorous scientific methodology with real-world impact. My approach emphasizes:
-
-- **Interdisciplinary Collaboration:** Working across machine learning and physics
-- **Open Science:** Sharing knowledge, code, and insights with the broader research community
-- **Global Accessibility:** Developing technologies that can benefit diverse communities worldwide
-- **Ethical Considerations:** Ensuring research contributes positively to society and addresses important challenges
+I work across machine learning and physics, sharing code and findings openly as I go. The work should reach communities that stand to benefit from it, not just well-resourced labs. That same standard applies to ethics: if a project can't justify its social value, it stays on the shelf.
 
 ## Future Directions
 
-I'm excited about pursuing graduate studies to deepen my theoretical foundations while continuing to focus on language models and quantum systems with practical impact. Areas of particular interest for future research include:
+I'm excited about pursuing graduate studies to deepen my theoretical foundations while continuing to focus on language models with practical impact. Areas of particular interest for future research include:
 
 - Multilingual and cross-cultural AI systems
-- Advanced quantum algorithms for optimization and simulation
 - Interpretable and culturally-compatible language models
