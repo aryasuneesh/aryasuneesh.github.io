@@ -31,7 +31,9 @@ menu:
 params:
     description: "Arya Suneesh's personal website showcasing her journey as an NLP Engineer, AI researcher, and quantum computing enthusiast. Explore her professional experience, research projects, and technical achievements."
     author: Arya Suneesh
-    googleSiteVerify: "Xqs22f6IZSKJzzHjaySVqxyBsL8ltKjnpWqBTvAwHg4"
+    analytics:
+        google:
+            SiteVerificationTag: "Xqs22f6IZSKJzzHjaySVqxyBsL8ltKjnpWqBTvAwHg4"
     keywords:
         - "Arya Suneesh"
         - "NLP Engineer"
